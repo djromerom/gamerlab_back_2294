@@ -87,9 +87,9 @@ model Equipo {
   id             Int           @id @default(autoincrement())
   nombre_equipo  String        @unique
   url_logo       String
-  estado         Estado
+  estado         Estado        @default(Pendiente_confirmacion)
   create_at      DateTime      @default(now())
-  update_at      DateTime      @default(now())
+  update_at      DateTime      @default(now()) @updatedAt
   deleted        Boolean       @default(false)
   estudiantes    Estudiante[]
   videojuegos    Videojuego[]
