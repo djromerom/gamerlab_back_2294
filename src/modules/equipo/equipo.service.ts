@@ -1,26 +1,84 @@
-import { Injectable } from '@nestjs/common';
+import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { CreateEquipoDto } from './dto/create-equipo.dto';
 import { UpdateEquipoDto } from './dto/update-equipo.dto';
+import { PrismaService } from 'src/prisma/prisma.service';
+import { ValidationExitsService } from 'src/common/services/validation-exits.service';
 
 @Injectable()
 export class EquipoService {
-  create(createEquipoDto: CreateEquipoDto) {
-    return 'This action adds a new equipo';
+  constructor(private readonly prisma: PrismaService, private readonly exits: ValidationExitsService) {}
+
+  async create(createEquipoDto: CreateEquipoDto) {
+    const existingEquipo = await this.prisma.equipo.findUnique({
+      where: {
+        nombre_equipo: createEquipoDto.nombre_equipo,
+      },
+    });
+
+    if (existingEquipo) {
+      throw new HttpException('El equipo ya existe', HttpStatus.BAD_REQUEST);
+    }
+
+    return this.prisma.equipo.create({
+      data: createEquipoDto,
+    });
   }
 
   findAll() {
-    return `This action returns all equipo`;
+    return this.prisma.equipo.findMany({
+      where: {
+        deleted: false,
+      },
+    })
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} equipo`;
+  async findOne(id: number) {
+    const equipo = await this.prisma.equipo.findUnique({
+      where: {
+        id: id,
+        deleted: false,
+      },
+    });
+
+    this.exits.validateExists('equipo', equipo);
+
+    return equipo;
   }
 
-  update(id: number, updateEquipoDto: UpdateEquipoDto) {
-    return `This action updates a #${id} equipo`;
+  async update(id: number, updateEquipoDto: UpdateEquipoDto) {
+    const equipo = await this.prisma.equipo.findUnique({
+      where: {
+        id: id,
+        deleted: false,
+      },
+    });
+
+    this.exits.validateExists('equipo', equipo);
+
+    return this.prisma.equipo.update({
+      where: {
+        id: id,
+        deleted: false,
+      },
+      data: updateEquipoDto,
+    });
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} equipo`;
+  async remove(id: number) {
+    const equipo = await this.prisma.equipo.findUnique({
+      where: {
+        id: id,
+        deleted: false,
+      },
+    });
+
+    this.exits.validateExists('equipo', equipo);
+
+    return this.prisma.equipo.update({
+      where: { id },
+      data: {
+        deleted: true,
+      },
+    });
   }
 }
