@@ -12,6 +12,7 @@ export class EquipoService {
     const existingEquipo = await this.prisma.equipo.findUnique({
       where: {
         nombre_equipo: createEquipoDto.nombre_equipo,
+        deleted: false,
       },
     });
 
