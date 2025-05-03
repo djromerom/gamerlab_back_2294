@@ -1,6 +1,5 @@
 import { Videojuego } from "@prisma/client";
 import { ApiProperty } from "@nestjs/swagger";
-import { EquipoEntity } from "src/modules/equipo/entities/equipo.entity";
 
 type VideojuegoInterface = Omit<Videojuego, 'deleted'>
 

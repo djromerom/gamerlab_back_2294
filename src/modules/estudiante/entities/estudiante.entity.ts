@@ -3,8 +3,7 @@ import { ApiProperty } from "@nestjs/swagger";
 
 type EstudianteInterface = Omit<Estudiante, 'deleted'>;
 
-
-export class EstudianteEntity {
+export class EstudianteEntity implements EstudianteInterface {
   @ApiProperty()
   id: number;
 

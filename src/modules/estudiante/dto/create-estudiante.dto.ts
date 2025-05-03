@@ -1,6 +1,5 @@
 import { ApiProperty } from "@nestjs/swagger";
-import { IsString, IsOptional, IsNotEmpty, IsEmail } from "class-validator";
-import {  } from "@prisma/client";
+import { IsString, IsNotEmpty, IsEmail } from "class-validator";
 
 export class CreateEstudianteDto {
   @IsNotEmpty()

@@ -36,11 +36,26 @@ export class VideojuegoService {
     });
   }
 
-  findAll() {
+  findAll(
+    limit: number | null = null,
+    equipo_id: number | null = null
+  ) {
+    // Si se proporciona un ID de equipo, filtrar los videojuegos por ese equipo
+    if (equipo_id) {
+      return this.prisma.videojuego.findMany({
+        where: {
+          deleted: false,
+          equipo_id: equipo_id,
+        },
+        take: limit || undefined,
+      });
+    }
+    // Si no se proporciona un ID de equipo, devolver todos los videojuegos
     return this.prisma.videojuego.findMany({
       where: {
         deleted: false,
       },
+      take: limit || undefined,
     });
   }
 

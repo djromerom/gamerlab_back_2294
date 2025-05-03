@@ -3,6 +3,7 @@ import { CreateEquipoDto } from './dto/create-equipo.dto';
 import { UpdateEquipoDto } from './dto/update-equipo.dto';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { ValidationExitsService } from 'src/common/services/validation-exits.service';
+import { Prisma } from '@prisma/client';
 
 @Injectable()
 export class EquipoService {
@@ -25,11 +26,85 @@ export class EquipoService {
     });
   }
 
-  findAll() {
+  findAll(
+    limit: number | null = null, 
+    materiaId: number | null = null,
+    nrc_id: number | null = null,
+  ) {
+    // Si se proporciona un ID de materia, filtrar los equipos por ese ID
+    const condiciones: Prisma.EquipoWhereInput[] = [];
+
+  if (materiaId != null) {
+    condiciones.push({
+      estudiantes: {
+        some: {
+          deleted: false,
+          estudianteNrcs: {
+            some: {
+              deleted: false,
+              nrc: {
+                deleted: false,
+                materia_id: materiaId,
+              },
+            },
+          },
+        },
+      },
+    });
+  }
+
+  if (codigoNrc != null) {
+    condiciones.push({
+      estudiantes: {
+        some: {
+          deleted: false,
+          estudianteNrcs: {
+            some: {
+              deleted: false,
+              id_nrc: codigoNrc,
+            },
+          },
+        },
+      },
+    });
+  }
+
+  const equipos = await prisma.equipo.findMany({
+    where: condiciones.length > 0
+      ? { AND: [{ deleted: false }, { OR: condiciones }] }
+      : { deleted: false },   // sin filtros, devuelve todos los equipos no eliminados
+    include: {
+      estudiantes: {
+        where: { deleted: false },
+        include: {
+          usuario: true,
+          estudianteNrcs: {
+            where: { deleted: false },
+            include: {
+              nrc: {
+                include: {
+                  materia: true,
+                },
+              },
+            },
+          },
+        },
+      },
+    },
+  });
+
+  return equipos;
+
+
+
+
+
+
     return this.prisma.equipo.findMany({
       where: {
         deleted: false,
       },
+      take: limit || undefined,
     })
   }
 
