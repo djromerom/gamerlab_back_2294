@@ -75,6 +75,28 @@ export class EquipoService {
 
     this.exits.validateExists('equipo', equipo);
 
+
+    // eliminar los videojuegos y estudiantes (NRCs tambien) relacionados
+    this.prisma.videojuego.updateMany({
+      where: {
+        equipo_id: id,
+        deleted: false,
+      },
+      data: {
+        deleted: true,
+      },
+    });
+
+    this.prisma.estudiante.updateMany({
+      where: {
+        equipo_id: id,
+        deleted: false,
+      },
+      data: {
+        deleted: true,
+      },
+    });
+
     return this.prisma.equipo.update({
       where: { id },
       data: {
