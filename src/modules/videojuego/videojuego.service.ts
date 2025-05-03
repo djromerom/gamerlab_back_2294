@@ -9,6 +9,16 @@ export class VideojuegoService {
   constructor(private prisma: PrismaService, private validationExits: ValidationExitsService) {}
 
   async create(createVideojuegoDto: CreateVideojuegoDto) {
+    // Verificar si el equipo existe en la base de datos
+    const equipo = await this.prisma.equipo.findFirst({
+      where: {
+        id: createVideojuegoDto.equipo_id,
+        deleted: false,
+      },
+    });
+    this.validationExits.validateExists('equipo', equipo);
+    
+    // Verificar si el videojuego ya existe en la base de datos
     const videojuego = await this.prisma.videojuego.findFirst({
       where: {
         equipo_id: createVideojuegoDto.equipo_id,
@@ -20,7 +30,7 @@ export class VideojuegoService {
       throw new Error('El videojuego ya existe');
     }
 
-
+    // Crear el videojuego
     return this.prisma.videojuego.create({
       data: createVideojuegoDto,
     });
