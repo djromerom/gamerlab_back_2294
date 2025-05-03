@@ -1,8 +1,8 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, HttpStatus } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, HttpStatus, Query } from '@nestjs/common';
 import { EquipoService } from './equipo.service';
 import { CreateEquipoDto } from './dto/create-equipo.dto';
 import { UpdateEquipoDto } from './dto/update-equipo.dto';
-import { ApiBody, ApiCreatedResponse, ApiNotFoundResponse, ApiOkResponse, ApiResponse } from '@nestjs/swagger';
+import { ApiBody, ApiCreatedResponse, ApiNotFoundResponse, ApiOkResponse, ApiResponse, ApiQuery } from '@nestjs/swagger';
 import { EquipoEntity } from './entities/equipo.entity';
 import { EstudianteEntity } from '../estudiante/entities/estudiante.entity';
 import { EstudianteService } from '../estudiante/estudiante.service';
@@ -33,11 +33,14 @@ export class EquipoController {
     return this.estudianteService.createMany(id, createEstudianteDto);
   }
 
-  @Get()
+  @Get('')
   @ApiOkResponse({ description: 'List of equipos.', type: EquipoEntity, isArray: true })
   @ApiResponse({ status: HttpStatus.UNAUTHORIZED, description: 'Unauthorized action.' })
-  findAll() {
-    return this.equipoService.findAll();
+  @ApiQuery({ name: 'limit', required: false, type: Number, description: 'Limit of equipos to return.' })
+  @ApiQuery({ name: 'materiaId', required: false, type: Number, description: 'Filter equipos by materia ID.' })
+  @ApiQuery({ name: 'codigoNrc', required: false, type: Number, description: 'Filter equipos by NRC code.' })
+  findAll(@Query('limit') limit?: number, @Query('materiaId') materiaId?: number, @Query('codigoNrc') codigoNrc?: number) {
+    return this.equipoService.findAll(limit, materiaId, codigoNrc);
   }
 
   @Get(':id')
