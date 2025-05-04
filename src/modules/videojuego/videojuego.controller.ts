@@ -1,11 +1,13 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, HttpStatus } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, HttpStatus, ClassSerializerInterceptor, SerializeOptions, UseInterceptors, Query } from '@nestjs/common';
 import { VideojuegoService } from './videojuego.service';
 import { CreateVideojuegoDto } from './dto/create-videojuego.dto';
 import { UpdateVideojuegoDto } from './dto/update-videojuego.dto';
-import { ApiCreatedResponse, ApiNotFoundResponse, ApiOkResponse, ApiResponse } from '@nestjs/swagger';
+import { ApiCreatedResponse, ApiNotFoundResponse, ApiOkResponse, ApiQuery, ApiResponse } from '@nestjs/swagger';
 import { VideoJuegoEntity } from './entities/videojuego.entity';
 
 @Controller('videojuego')
+@UseInterceptors(ClassSerializerInterceptor)
+@SerializeOptions({ type: VideoJuegoEntity })
 export class VideojuegoController {
   constructor(private readonly videojuegoService: VideojuegoService) {}
 
@@ -21,8 +23,10 @@ export class VideojuegoController {
   @Get()
   @ApiOkResponse({ description: 'List of videojuegos retrieved successfully.', type: VideoJuegoEntity, isArray: true })
   @ApiResponse({ status: HttpStatus.UNAUTHORIZED, description: 'Unauthorized action.' })
-  findAll() {
-    return this.videojuegoService.findAll();
+  @ApiQuery({ name: 'limit', required: false, type: Number, description: 'Limit of videojuegos to return.' })
+  @ApiQuery({ name: 'equipo_id', required: false, type: Number, description: 'Filter videojuegos by equipo ID.' })
+  findAll(@Query('limit') limit?: number, @Query('equipo_id') equipo_id?: number): Promise<VideoJuegoEntity[]> {
+    return this.videojuegoService.findAll(limit, equipo_id);
   }
 
   @Get(':id')
@@ -45,7 +49,7 @@ export class VideojuegoController {
     return this.videojuegoService.update(id, updateVideojuegoDto);
   }
 
-  @Delete(':id')
+  /* @Delete(':id')
   @ApiNotFoundResponse({ description: 'Videojuego not found.' })
   @ApiOkResponse({ description: 'Videojuego deleted successfully.', type: VideoJuegoEntity })
   @ApiResponse({ status: HttpStatus.BAD_REQUEST, description: 'Videojuego cannot be deleted.' })
@@ -53,5 +57,5 @@ export class VideojuegoController {
   @ApiResponse({ status: HttpStatus.BAD_REQUEST, description: 'Invalid ID format.' })
   remove(@Param('id') id: number) {
     return this.videojuegoService.remove(id);
-  }
+  } */
 }

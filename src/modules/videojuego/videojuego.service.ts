@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { CreateVideojuegoDto } from './dto/create-videojuego.dto';
 import { UpdateVideojuegoDto } from './dto/update-videojuego.dto';
 import { PrismaService } from 'src/prisma/prisma.service';
@@ -27,7 +27,7 @@ export class VideojuegoService {
     });
 
     if (videojuego) {
-      throw new Error('El videojuego ya existe');
+      throw new HttpException('El videojuego ya existe', HttpStatus.BAD_REQUEST);
     }
 
     // Crear el videojuego

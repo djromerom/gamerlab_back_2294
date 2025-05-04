@@ -1,9 +1,8 @@
 import { Videojuego } from "@prisma/client";
 import { ApiProperty } from "@nestjs/swagger";
+import { Exclude } from "class-transformer";
 
-type VideojuegoInterface = Omit<Videojuego, 'deleted'>
-
-export class VideoJuegoEntity implements VideojuegoInterface {
+export class VideoJuegoEntity implements Videojuego {
   @ApiProperty()
   id: number;
 
@@ -16,9 +15,16 @@ export class VideoJuegoEntity implements VideojuegoInterface {
   @ApiProperty()
   equipo_id: number
 
-  @ApiProperty()
+  @Exclude()
   create_at: Date;  
 
-  @ApiProperty()
+  @Exclude()
   update_at: Date;
+
+  @Exclude()
+  deleted: boolean;
+
+  constructor(partial: Partial<VideoJuegoEntity>) {
+    Object.assign(this, partial);
+  }
 }
