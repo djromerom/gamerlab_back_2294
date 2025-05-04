@@ -1,13 +1,14 @@
 import { Estudiante } from "@prisma/client";
 import { ApiProperty } from "@nestjs/swagger";
+import { Exclude } from "class-transformer";
 
-type EstudianteInterface = Omit<Estudiante, 'deleted'>;
 
-export class EstudianteEntity implements EstudianteInterface {
+export class EstudianteEntity implements Estudiante {
   @ApiProperty()
   id: number;
 
   @ApiProperty()
+  @Exclude()
   equipo_id: number;
 
   @ApiProperty()
@@ -19,9 +20,16 @@ export class EstudianteEntity implements EstudianteInterface {
   @ApiProperty()
   confirmado: boolean;
 
-  @ApiProperty()
+  @Exclude()
   create_at: Date;
 
-  @ApiProperty()
+  @Exclude()
   update_at: Date;
+
+  @Exclude()
+  deleted: boolean;
+  
+  constructor(partial: Partial<EstudianteEntity>) {
+    Object.assign(this, partial);
+  }
 }
