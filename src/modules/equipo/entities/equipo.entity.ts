@@ -1,9 +1,10 @@
-import { Equipo, Estado } from "@prisma/client";
+import { Estado, Videojuego } from "@prisma/client";
 import { ApiProperty } from "@nestjs/swagger";
+import { Exclude } from "class-transformer";
+import { VideoJuegoEntity } from "src/modules/videojuego/entities/videojuego.entity";
+import { EstudianteEntity } from "src/modules/estudiante/entities/estudiante.entity";
 
-type EquipoInterface = Omit<Equipo, 'deleted'>
-
-export class EquipoEntity implements EquipoInterface {
+export class EquipoEntity {
   @ApiProperty()
   id: number;
   
@@ -15,10 +16,23 @@ export class EquipoEntity implements EquipoInterface {
   
   @ApiProperty({enum: Estado, enumName: 'Estado'})
   estado: Estado;
-  
+
   @ApiProperty()
+  videojuegos: VideoJuegoEntity[];
+
+  @ApiProperty()
+  estudiantes: EstudianteEntity[];
+  
+  @Exclude()
   create_at: Date;
   
-  @ApiProperty()
+  @Exclude()
   update_at: Date;
+
+  @Exclude()
+  deleted: boolean;
+
+  constructor(partial: Partial<EquipoEntity>) {
+    Object.assign(this, partial);
+  }
 }

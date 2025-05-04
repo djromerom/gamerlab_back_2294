@@ -88,6 +88,9 @@ export class EquipoService {
             },
           },
         },
+        videojuegos: {
+          where: { deleted: false },
+        },
       },
     });
 
