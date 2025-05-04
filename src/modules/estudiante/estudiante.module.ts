@@ -1,9 +1,10 @@
 import { Module } from '@nestjs/common';
 import { EstudianteService } from './estudiante.service';
-import { EstudianteController } from './estudiante.controller';
+import { PrismaService } from 'src/prisma/prisma.service';
+import { ValidationExitsService } from 'src/common/services/validation-exits.service';
 
 @Module({
-  controllers: [EstudianteController],
-  providers: [EstudianteService],
+  providers: [EstudianteService, PrismaService, ValidationExitsService],
+  exports: [EstudianteService],
 })
 export class EstudianteModule {}

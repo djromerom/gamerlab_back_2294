@@ -1,26 +1,112 @@
-import { Injectable } from '@nestjs/common';
+import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { CreateVideojuegoDto } from './dto/create-videojuego.dto';
 import { UpdateVideojuegoDto } from './dto/update-videojuego.dto';
+import { PrismaService } from 'src/prisma/prisma.service';
+import { ValidationExitsService } from 'src/common/services/validation-exits.service';
 
 @Injectable()
 export class VideojuegoService {
-  create(createVideojuegoDto: CreateVideojuegoDto) {
-    return 'This action adds a new videojuego';
+  constructor(private prisma: PrismaService, private validationExits: ValidationExitsService) {}
+
+  async create(createVideojuegoDto: CreateVideojuegoDto) {
+    // Verificar si el equipo existe en la base de datos
+    const equipo = await this.prisma.equipo.findFirst({
+      where: {
+        id: createVideojuegoDto.equipo_id,
+        deleted: false,
+      },
+    });
+    this.validationExits.validateExists('equipo', equipo);
+    
+    // Verificar si el videojuego ya existe en la base de datos
+    const videojuego = await this.prisma.videojuego.findFirst({
+      where: {
+        equipo_id: createVideojuegoDto.equipo_id,
+        deleted: false,
+      }
+    });
+
+    if (videojuego) {
+      throw new HttpException('El videojuego ya existe', HttpStatus.BAD_REQUEST);
+    }
+
+    // Crear el videojuego
+    return this.prisma.videojuego.create({
+      data: createVideojuegoDto,
+    });
   }
 
-  findAll() {
-    return `This action returns all videojuego`;
+  findAll(
+    limit: number | null = null,
+    equipo_id: number | null = null
+  ) {
+    // Si se proporciona un ID de equipo, filtrar los videojuegos por ese equipo
+    if (equipo_id) {
+      return this.prisma.videojuego.findMany({
+        where: {
+          deleted: false,
+          equipo_id: equipo_id,
+        },
+        take: limit || undefined,
+      });
+    }
+    // Si no se proporciona un ID de equipo, devolver todos los videojuegos
+    return this.prisma.videojuego.findMany({
+      where: {
+        deleted: false,
+      },
+      take: limit || undefined,
+    });
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} videojuego`;
+  async findOne(id: number) {
+    const videojuego = await this.prisma.videojuego.findFirst({
+      where: {
+        id,
+        deleted: false,
+      },
+    });
+
+    this.validationExits.validateExists('videojuego', videojuego);
+
+    return videojuego;
   }
 
-  update(id: number, updateVideojuegoDto: UpdateVideojuegoDto) {
-    return `This action updates a #${id} videojuego`;
+  async update(id: number, updateVideojuegoDto: UpdateVideojuegoDto) {
+    const videojuego = await this.prisma.videojuego.findFirst({
+      where: {
+        id,
+        deleted: false,
+      },
+    });
+
+    this.validationExits.validateExists('videojuego', videojuego);
+
+    return this.prisma.videojuego.update({
+      where: {
+        id,
+      },
+      data: updateVideojuegoDto,
+    });
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} videojuego`;
+  async remove(id: number) {
+    const videojuego = await this.prisma.videojuego.findFirst({
+      where: {
+        id,
+        deleted: false,
+      },
+    });
+
+    this.validationExits.validateExists('videojuego', videojuego);
+
+    return this.prisma.videojuego.update({
+      where: {
+        id,
+      },
+      data: {
+        deleted: true,
+      },
+    });
   }
 }
