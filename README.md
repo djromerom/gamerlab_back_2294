@@ -45,7 +45,7 @@ Sistema web para gestionar el proceso de inscripción, evaluación y seguimiento
 1. Clona el repositorio:
 
 ```bash
-git clone https://github.com/tu-usuario/gamerlab_back.git
+git clone https://github.com/djromeron/gamerlab_back.git
 ```
 
 2. Instala las dependencias:
