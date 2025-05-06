@@ -5,6 +5,7 @@ import { ConfigModule } from '@nestjs/config'
 import { EstudianteModule } from './modules/estudiante/estudiante.module';
 import { MateriaModule } from './modules/materia/materia.module';
 import { NrcModule } from './modules/nrc/nrc.module';
+import { StorageModule } from './modules/storage/storage.module'
 
 @Module({
   imports: [
@@ -17,6 +18,7 @@ import { NrcModule } from './modules/nrc/nrc.module';
     EstudianteModule,
     MateriaModule,
     NrcModule,
+    StorageModule
   ],
   providers: [],
 })
