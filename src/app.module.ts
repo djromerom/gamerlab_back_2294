@@ -6,6 +6,7 @@ import { EstudianteModule } from './modules/estudiante/estudiante.module';
 import { MateriaModule } from './modules/materia/materia.module';
 import { NrcModule } from './modules/nrc/nrc.module';
 import { StorageModule } from './modules/storage/storage.module'
+import { JuradosModule } from './modules/jurados/jurados.module';
 
 @Module({
   imports: [
@@ -18,6 +19,7 @@ import { StorageModule } from './modules/storage/storage.module'
     EstudianteModule,
     MateriaModule,
     NrcModule,
+    JuradosModule
   ],
   providers: [],
 })

@@ -40,4 +40,24 @@ export class EmailService {
       throw new HttpException("Email no enviado", HttpStatus.INTERNAL_SERVER_ERROR)
     }
   }
+
+  async sendJuradoInvitation(email: string, token: string) {
+    const confirmUrl = `${this.configService.get('APP_URL')}/jurados/confirmar/${token}`;
+    
+    await this.transporter.sendMail({
+      from: this.configService.get('SMTP_FROM'),
+      to: email,
+      subject: 'Bienvenido a GameLab - Confirmación de Jurado',
+      html: `
+        <h1>Bienvenido a GameLab</h1>
+        <p>Has sido seleccionado como jurado para evaluar videojuegos.</p>
+        <p>Por favor confirma tu participación haciendo clic en el siguiente botón:</p>
+        <a href="${confirmUrl}" 
+           style="padding: 10px 20px; background: #4CAF50; color: white; 
+                  text-decoration: none; border-radius: 5px;">
+          Aceptar invitación y acceder
+        </a>
+      `
+    });
+  }
 }
