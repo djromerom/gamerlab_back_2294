@@ -1,8 +1,9 @@
 import { Estado, Videojuego } from "@prisma/client";
 import { ApiProperty } from "@nestjs/swagger";
-import { Exclude } from "class-transformer";
+import { Exclude, Type } from "class-transformer";
 import { VideoJuegoEntity } from "src/modules/videojuego/entities/videojuego.entity";
 import { EstudianteEntity } from "src/modules/estudiante/entities/estudiante.entity";
+import { ValidateNested } from "class-validator";
 
 export class EquipoEntity {
   @ApiProperty()
@@ -18,9 +19,13 @@ export class EquipoEntity {
   estado: Estado;
 
   @ApiProperty()
+  @ValidateNested({ each: true })
+  @Type(() => VideoJuegoEntity)
   videojuegos: VideoJuegoEntity[];
 
   @ApiProperty()
+  @ValidateNested({ each: true })
+  @Type(() => EstudianteEntity)
   estudiantes: EstudianteEntity[];
   
   @Exclude()
