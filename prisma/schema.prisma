@@ -52,7 +52,7 @@ model Estudiante {
   github         String
   confirmado     Boolean         @default(false)
   create_at      DateTime        @default(now())
-  update_at      DateTime        @default(now())
+  update_at      DateTime        @default(now()) @updatedAt
   deleted        Boolean         @default(false)
   usuario        Usuario         @relation(fields: [id_user], references: [id])
   equipo         Equipo          @relation(fields: [equipo_id], references: [id])
@@ -87,25 +87,26 @@ model Equipo {
   id             Int           @id @default(autoincrement())
   nombre_equipo  String        @unique
   url_logo       String
-  estado         Estado
+  estado         Estado        @default(Pendiente_confirmacion)
   create_at      DateTime      @default(now())
-  update_at      DateTime      @default(now())
+  update_at      DateTime      @default(now()) @updatedAt
   deleted        Boolean       @default(false)
   estudiantes    Estudiante[]
   videojuegos    Videojuego[]
 }
 
 model Videojuego {
-  id                 Int                 @id @default(autoincrement())
+  id                 Int                @id @default(autoincrement())
   equipo_id          Int
   nombre_videojuego  String
   descripcion        String
   create_at          DateTime           @default(now())
-  update_at          DateTime           @default(now())
+  update_at          DateTime           @default(now()) @updatedAt
   deleted            Boolean            @default(false)
   equipo             Equipo             @relation(fields: [equipo_id], references: [id])
   evaluaciones       Evaluacion[]
   asignaciones       VideojuegoAsignado[]
+  @@unique([id, equipo_id])
 }
 
 model VideojuegoAsignado {
