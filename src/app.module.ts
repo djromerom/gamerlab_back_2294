@@ -18,7 +18,6 @@ import { StorageModule } from './modules/storage/storage.module'
     EstudianteModule,
     MateriaModule,
     NrcModule,
-    StorageModule
   ],
   providers: [],
 })

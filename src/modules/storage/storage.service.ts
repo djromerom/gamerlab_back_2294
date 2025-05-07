@@ -10,8 +10,8 @@ export class StorageService {
   
   constructor(private configService: ConfigService) {
     this.supabase = createClient(
-      this.configService.get('SUPABASE_URL'),
-      this.configService.get('SUPABASE_KEY')
+      this.configService.get('SUPABASE_URL') as string,
+      this.configService.get('SUPABASE_KEY') as string
     );
   }
 
