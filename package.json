@@ -30,6 +30,7 @@
     "@supabase/supabase-js": "^2.49.4",
     "class-transformer": "^0.5.1",
     "class-validator": "^0.14.1",
+    "excel4node": "^1.8.2",
     "nodemailer": "^7.0.2",
     "reflect-metadata": "^0.2.2",
     "rxjs": "^7.8.1"
