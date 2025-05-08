@@ -1,12 +1,12 @@
 import { Injectable, BadRequestException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { createClient } from '@supabase/supabase-js';
+import { createClient, SupabaseClient } from '@supabase/supabase-js';
 import { extname } from 'path';
-import { Multer } from 'multer';
+import * as multer from 'multer';
 
 @Injectable()
 export class StorageService {
-  private supabase;
+  private supabase: SupabaseClient;
   
   constructor(private configService: ConfigService) {
     this.supabase = createClient(
@@ -15,7 +15,7 @@ export class StorageService {
     );
   }
 
-  async uploadLogo(file: Multer.File): Promise<string> {
+  async uploadLogo(file: Express.Multer.File): Promise<string> {
     if (!file) {
       throw new BadRequestException('No file uploaded');
     }
