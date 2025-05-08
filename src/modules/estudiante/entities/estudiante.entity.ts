@@ -28,6 +28,9 @@ export class EstudianteEntity implements Estudiante {
 
   @Exclude()
   deleted: boolean;
+
+  @Exclude()
+  token_confirmacion: string | null;
   
   constructor(partial: Partial<EstudianteEntity>) {
     Object.assign(this, partial);

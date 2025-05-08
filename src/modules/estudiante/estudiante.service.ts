@@ -4,21 +4,23 @@ import { ValidationExitsService } from 'src/common/services/validation-exits.ser
 import { CreateEstudianteDto } from './dto/create-estudiante.dto';
 import { UpdateEstudianteDto } from './dto/update-estudiante.dto';
 import { EstudianteEntity } from './entities/estudiante.entity';
+import { randomBytes } from 'crypto';
+import { EmailService } from 'src/modules/email/email.service';
 
 @Injectable()
 export class EstudianteService {
-  constructor(private readonly prisma: PrismaService, private readonly exits: ValidationExitsService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly exits: ValidationExitsService,
+    private readonly emailService: EmailService
+  ) { }
+
+  // Genera token para confirmación
+  private generateToken(): string {
+    return randomBytes(32).toString('hex');
+  }
 
   async create(id_equipo: number, createEstudianteDto: CreateEstudianteDto) {
-    // Verificar si el equipo existe en la base de datos
-    const existingEquipo = await this.prisma.equipo.findUnique({
-      where: {
-        id: id_equipo,
-        deleted: false,
-      },
-    });
-
-    this.exits.validateExists('equipo', existingEquipo);
 
     // Verificar si el estudiante ya existe en la base de datos
     let usuario = await this.prisma.usuario.findUnique({
@@ -54,11 +56,17 @@ export class EstudianteService {
       throw new HttpException('El estudiante ya existe', HttpStatus.BAD_REQUEST);
     }
 
+    // Generar token para la confirmación por correo
+    const confirmationToken = this.generateToken();
+
+    // Guardar el token en algún lugar (podríamos añadir una tabla de tokens o usar Redis)
+    // Por ahora, lo guardaremos en el mismo estudiante
     const estudiante = await this.prisma.estudiante.create({
       data: {
         equipo_id: id_equipo,
         id_user: usuario.id,
         github: createEstudianteDto.github,
+        token_confirmacion: confirmationToken, // Añadir esta columna en la próxima migración
       },
     });
 
@@ -66,12 +74,30 @@ export class EstudianteService {
   }
 
   async createMany(id_equipo: number, createEstudianteDto: CreateEstudianteDto[]) {
-    const estudiantes: EstudianteEntity[] = [];
-    
-    createEstudianteDto.forEach(async (estudiante) => {
-      const newEstudiante = await this.create(id_equipo, estudiante);
-      estudiantes.push(newEstudiante);
+    // Verificar si el equipo existe en la base de datos
+    const existingEquipo = await this.prisma.equipo.findUnique({
+      where: {
+        id: id_equipo,
+        deleted: false,
+      },
     });
+    this.exits.validateExists('equipo', existingEquipo);
+
+    // Usar Promise.all para esperar a que todos los estudiantes se creen
+    const estudiantes = await Promise.all(
+      createEstudianteDto.map(estudiante => this.create(id_equipo, estudiante))
+    );
+
+    console.log(estudiantes);
+    // enviar correo de confirmación a todos los estudiantes
+    await this.emailService.sendConfirmationEmail(
+      {
+        emails: createEstudianteDto.map(e => e.email),
+        teamName: existingEquipo?.nombre_equipo as string,
+        token: estudiantes.map(e => e.token_confirmacion as string),
+      }
+    );
+
     return estudiantes;
   }
 
@@ -146,5 +172,57 @@ export class EstudianteService {
         deleted: true,
       },
     });
+  }
+
+  async confirmarEstudiante(token: string): Promise<Partial<EstudianteEntity>> {
+    // Buscar estudiante por token
+    const estudiante = await this.prisma.estudiante.findFirst({
+      where: {
+        token_confirmacion: token, // Asumiendo que tenemos esta columna
+        deleted: false,
+      },
+    });
+
+    if (!estudiante) {
+      console.log('Token no encontrado:', token);
+      throw new HttpException('Token de confirmación no válido este', HttpStatus.NOT_FOUND);
+    }
+
+    if (estudiante.confirmado) {
+      throw new HttpException('El estudiante ya está confirmado', HttpStatus.BAD_REQUEST);
+    }
+    
+    
+
+    // Actualizar estado de confirmación
+    const estudianteActualizado = await this.prisma.estudiante.update({
+      where: {
+        id: estudiante.id,
+      },
+      data: {
+        confirmado: true,
+        token_confirmacion: null, // Borramos el token una vez usado
+      },
+      select: {
+        id: true,
+        confirmado: true,
+        github: true,
+        equipo_id: true,
+        usuario: {
+          select: {
+            nombre_completo: true,
+            email: true,
+          },
+        },
+        equipo: {
+          select: {
+            id: true,
+            nombre_equipo: true,
+          },
+        },
+      },
+    });
+
+    return estudianteActualizado;
   }
 }

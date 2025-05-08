@@ -1,12 +1,14 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, HttpStatus, Query, SerializeOptions, ClassSerializerInterceptor, UseInterceptors } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, HttpStatus, Query, SerializeOptions, ClassSerializerInterceptor, UseInterceptors, HttpException } from '@nestjs/common';
 import { EquipoService } from './equipo.service';
 import { CreateEquipoDto } from './dto/create-equipo.dto';
 import { UpdateEquipoDto } from './dto/update-equipo.dto';
-import { ApiBody, ApiCreatedResponse, ApiNotFoundResponse, ApiOkResponse, ApiResponse, ApiQuery } from '@nestjs/swagger';
+import { ApiBody, ApiCreatedResponse, ApiNotFoundResponse, ApiOkResponse, ApiResponse, ApiQuery, ApiOperation } from '@nestjs/swagger';
 import { EquipoEntity } from './entities/equipo.entity';
 import { EstudianteEntity } from '../estudiante/entities/estudiante.entity';
 import { EstudianteService } from '../estudiante/estudiante.service';
 import { CreateEstudianteDto } from '../estudiante/dto/create-estudiante.dto';
+import { ConfirmEstudianteDto } from '../estudiante/dto/confirm-estudiante.dto';
+import { Estado } from '@prisma/client';
 
 @Controller('equipo')
 @UseInterceptors(ClassSerializerInterceptor)
@@ -34,6 +36,37 @@ export class EquipoController {
   @ApiBody({ type: CreateEstudianteDto, isArray: true })
   createEstudiante(@Param('id') id: number, @Body() createEstudianteDto: CreateEstudianteDto[]) {
     return this.estudianteService.createMany(id, createEstudianteDto);
+  }
+
+  @Get('confirmar')
+  @ApiOperation({ summary: 'Confirmar registro de estudiante mediante token' })
+  @ApiBody({ type: ConfirmEstudianteDto })
+  @ApiResponse({ 
+    status: 200, 
+    description: 'Estudiante confirmado exitosamente',
+    type: EstudianteEntity
+  })
+  @ApiResponse({ status: 404, description: 'Token no válido o estudiante no encontrado' })
+  @ApiResponse({ status: 400, description: 'El estudiante ya está confirmado' })
+  async confirmRegistro(@Query() confirmDto: ConfirmEstudianteDto) {
+    
+    const estudiante = await this.estudianteService.confirmarEstudiante(confirmDto.token);
+    if (estudiante.equipo_id !== undefined) {
+      this.equipoService.updateEstado(estudiante.equipo_id, Estado.Inscrito_confirmado);
+    } else {
+      // Manejar el caso cuando equipo_id es undefined
+      throw new HttpException('El estudiante no tiene un equipo asignado', HttpStatus.BAD_REQUEST);
+    }
+
+    const allConfirmados = await this.equipoService.allEstudiantesConfirmados(estudiante.equipo_id);
+
+    if (allConfirmados) {
+      this.equipoService.updateEstado(estudiante.equipo_id, Estado.Inscripcion_completa);
+    } else {
+      this.equipoService.updateEstado(estudiante.equipo_id, Estado.Inscrito_confirmado);
+    }
+    
+    return estudiante;
   }
 
   @SerializeOptions({ type: EquipoEntity })

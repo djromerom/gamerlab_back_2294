@@ -32,7 +32,7 @@ export class StorageController {
         ],
       }),
     )
-    file: Multer.File,
+    file: Express.Multer.File,
   ) {
     return {
       url: await this.storageService.uploadLogo(file)
