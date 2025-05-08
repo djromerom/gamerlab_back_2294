@@ -5,8 +5,10 @@ import { ConfigModule } from '@nestjs/config'
 import { EstudianteModule } from './modules/estudiante/estudiante.module';
 import { MateriaModule } from './modules/materia/materia.module';
 import { NrcModule } from './modules/nrc/nrc.module';
-import { StorageModule } from './modules/storage/storage.module'
-import { JuradosModule } from './modules/jurados/jurados.module';
+
+// import { StorageModule } from './modules/storage/storage.module';  // Comment this line
+import { JuradoModule } from './modules/jurado/jurado.module';
+
 
 @Module({
   imports: [
@@ -19,7 +21,10 @@ import { JuradosModule } from './modules/jurados/jurados.module';
     EstudianteModule,
     MateriaModule,
     NrcModule,
-    JuradosModule
+
+  // StorageModule,  // Uncomment this line if you need the StorageModule
+    JuradoModule,
+
   ],
   providers: [],
 })
