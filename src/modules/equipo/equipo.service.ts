@@ -3,7 +3,7 @@ import { CreateEquipoDto } from './dto/create-equipo.dto';
 import { UpdateEquipoDto } from './dto/update-equipo.dto';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { ValidationExitsService } from 'src/common/services/validation-exits.service';
-import { Prisma } from '@prisma/client';
+import { Prisma, Estado } from '@prisma/client';
 
 @Injectable()
 export class EquipoService {
@@ -167,5 +167,42 @@ export class EquipoService {
         deleted: true,
       },
     });
+  }
+
+  async updateEstado(idequipo: number, estado: Estado) {
+    const equipo = await this.prisma.equipo.findUnique({
+      where: {
+        id: idequipo,
+        deleted: false,
+      },
+    });
+
+    this.exits.validateExists('equipo', equipo);
+
+    return this.prisma.equipo.update({
+      where: { id: idequipo },
+      data: { estado },
+    });
+  }
+
+  //funcion que valida si todos los estudiantes de un equipo están confirmados
+  async allEstudiantesConfirmados(idEquipo: number): Promise<boolean> {
+    const equipo = await this.prisma.equipo.findUnique({
+      where: {
+        id: idEquipo,
+        deleted: false,
+      },
+      include: {
+        estudiantes: {
+          where: { deleted: false },
+        },
+      },
+    });
+
+    if (!equipo) {
+      throw new HttpException('Equipo no encontrado', HttpStatus.NOT_FOUND);
+    }
+
+    return equipo.estudiantes.every((estudiante) => estudiante.confirmado);
   }
 }

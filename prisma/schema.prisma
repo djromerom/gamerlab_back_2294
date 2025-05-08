@@ -23,17 +23,18 @@ model Usuario {
 }
 
 model Estudiante {
-  id             Int             @id @default(autoincrement())
-  equipo_id      Int
-  id_user        Int             @unique
-  github         String
-  confirmado     Boolean         @default(false)
-  create_at      DateTime        @default(now())
-  update_at      DateTime        @default(now()) @updatedAt
-  deleted        Boolean         @default(false)
-  equipo         Equipo          @relation(fields: [equipo_id], references: [id])
-  usuario        Usuario         @relation(fields: [id_user], references: [id])
-  estudianteNrcs EstudianteNRC[]
+  id                Int             @id @default(autoincrement())
+  equipo_id         Int
+  id_user           Int             @unique
+  github            String
+  confirmado        Boolean         @default(false)
+  token_confirmacion String?
+  create_at         DateTime        @default(now())
+  update_at         DateTime        @default(now()) @updatedAt
+  deleted           Boolean         @default(false)
+  equipo            Equipo          @relation(fields: [equipo_id], references: [id])
+  usuario           Usuario         @relation(fields: [id_user], references: [id])
+  estudianteNrcs    EstudianteNRC[]
 }
 
 model EstudianteNRC {

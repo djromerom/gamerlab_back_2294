@@ -28,10 +28,9 @@ export class JuradoService {
         const confirmationUrl = `${baseUrl}/jurado/confirmar/${jurado.token_confirmacion}`;
         
         // Formato adecuado para el EmailService
-        return this.emailService.sendConfirmationEmail({
-          emails: [jurado.usuario.email],
+        return this.emailService.sendJuradoInvitation({
+          email: jurado.usuario.email,
           token: jurado.token_confirmacion,
-          teamName: `Jurado: ${jurado.usuario.nombre_completo}`
         });
       }
   /**
