@@ -101,6 +101,8 @@ export class ReportsService {
       if (column === undefined) {
         column = ++currentColumn;
         columnMap.set(rating.criterio, column);
+
+        worksheet.cell(1, column).string(rating.criterio);
       }
 
       worksheet.cell(row, column).number(rating.average);
