@@ -1,6 +1,7 @@
 import { Controller, Get, Post, Param, Body, Req, UseGuards } from '@nestjs/common';
 import { EvaluacionService } from './evaluacion.service';
 import { CreateEvaluacionDto } from './dto/create-evaluacion.dto';
+import { PrismaService } from '../../prisma/prisma.service';
 // import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard'; // descomentar cuando ya este el auth
 // import { AuthenticatedRequest } from 'src/auth/types'; // descomentar si se definen tipos personalizados
 
