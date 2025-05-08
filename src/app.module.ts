@@ -1,20 +1,30 @@
 import { Module } from '@nestjs/common';
-import { EquipoModule } from './modules/equipo/equipo.module';
-import { VideojuegoModule } from './modules/videojuego/videojuego.module';
-
-import { EstudianteModule } from './modules/estudiante/estudiante.module';
-import { PrismaService } from './prisma/prisma.service'
-import { MateriaModule } from './modules/materia/materia.module';
-import { NrcModule } from './modules/nrc/nrc.module';
+import { AppController } from './app.controller';
+import { AppService } from './app.service';
+import { AuthModule } from './auth/auth.module';
+import { ConfigModule, ConfigService } from '@nestjs/config';
+import { JwtModule } from '@nestjs/jwt';
+import { UsersController } from './users/users.controller';
+import { UsersModule } from './users/users.module';
 
 @Module({
   imports: [
-    EquipoModule, 
-    VideojuegoModule, 
-    EstudianteModule,
-    MateriaModule,
-    NrcModule,
+    ConfigModule.forRoot({
+      isGlobal: true, // para que ConfigService esté disponible en toda la app sin tener que importarlo cada vez
+    }),
+    JwtModule.registerAsync({
+      imports: [ConfigModule],
+      inject: [ConfigService],
+      useFactory: async (configService: ConfigService) => ({
+        secret: configService.get('SECRET'),
+        signOptions: { expiresIn: '1h' },
+      }),
+    }),
+    AuthModule,
+    UsersModule,
   ],
-  providers: [],
+  controllers: [AppController],
+  providers: [AppService],
 })
 export class AppModule {}
+
