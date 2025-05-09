@@ -1,7 +1,8 @@
 import { Injectable } from '@nestjs/common';
 import { Prisma } from '@prisma/client';
 import { PrismaService } from 'src/prisma/prisma.service';
-import excel from 'excel4node';
+import * as excel from 'excel4node';
+import { Decimal } from '@prisma/client/runtime/library';
 
 function getRatingsQuery(videojuegos?: number[]) {
   const idCheck = videojuegos
@@ -13,19 +14,19 @@ function getRatingsQuery(videojuegos?: number[]) {
 	cr.nombre criterio,
 	AVG(rb.valoracion) average
 FROM
-	rubrica rb
-	JOIN criterio cr
+	"Rubrica" rb
+	JOIN "Criterio" cr
 		ON rb.id_criterio = cr.id
-	JOIN evaluacion ev
+	JOIN "Evaluacion" ev
 		ON rb.id_evaluacion = ev.id
-	JOIN videojuego vg
+	JOIN "Videojuego" vg
 		ON ev.videojuego_id = vg.id
 WHERE
 	rb.deleted = false
 	AND cr.deleted = false
 	AND ev.deleted = false
 	AND vg.deleted = false
-	${idCheck}
+  ${idCheck}
 GROUP BY
 	vg.id,
 	cr.nombre`;
@@ -39,7 +40,7 @@ type GameName = {
 export interface RatingRow {
   id: number;
   criterio: string;
-  average: number;
+  average: Decimal;
 }
 
 @Injectable()
@@ -105,7 +106,7 @@ export class ReportsService {
         worksheet.cell(1, column).string(rating.criterio);
       }
 
-      worksheet.cell(row, column).number(rating.average);
+      worksheet.cell(row, column).number(rating.average.toNumber());
     }
 
     return workbook;
