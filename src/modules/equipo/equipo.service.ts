@@ -98,17 +98,27 @@ export class EquipoService {
   }
 
   async findOne(id: number) {
-    const equipo = await this.prisma.equipo.findUnique({
-      where: {
-        id: id,
-        deleted: false,
+  const equipo = await this.prisma.equipo.findUnique({
+    where: {
+      id: id,
+      deleted: false,
+    },
+    include: {
+      estudiantes: {
+        where: { deleted: false },
+        include: {
+          usuario: true
+        }
       },
-    });
+      videojuegos: {
+        where: { deleted: false }
+      }
+    }
+  });
 
-    this.exits.validateExists('equipo', equipo);
-
-    return equipo;
-  }
+  this.exits.validateExists('equipo', equipo);
+  return equipo;
+}
 
   async update(id: number, updateEquipoDto: UpdateEquipoDto) {
     const equipo = await this.prisma.equipo.findUnique({
