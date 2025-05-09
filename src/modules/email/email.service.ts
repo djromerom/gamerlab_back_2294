@@ -168,11 +168,9 @@ export class EmailService {
             </html>
           `,
         });
-        
-        console.log('Email sent successfully to:', emails);
+        console.log('Email sent successfully');
         return true;
       } catch (error) {
-        console.error('Failed to send email:', error);
         throw new HttpException(`Email no enviado: ${error.message}`, HttpStatus.INTERNAL_SERVER_ERROR);
       }
     };
@@ -183,18 +181,62 @@ export class EmailService {
     const confirmUrl = `${this.configService.get('APP_URL')}/jurados/confirmar/${token}`;
     
     this.transporter.sendMail({
-      from: this.configService.get('SMTP_FROM'),
+      from: this.configService.get('MAIL_FROM'),
       to: email,
       subject: 'Bienvenido a GameLab - Confirmación de Jurado',
       html: `
-        <h1>Bienvenido a GameLab</h1>
-        <p>Has sido seleccionado como jurado para evaluar videojuegos.</p>
-        <p>Por favor confirma tu participación haciendo clic en el siguiente botón:</p>
-        <a href="${confirmUrl}" 
-           style="padding: 10px 20px; background: #4CAF50; color: white; 
-                  text-decoration: none; border-radius: 5px;">
-          Aceptar invitación y acceder
-        </a>
+        <!DOCTYPE html>
+        <html>
+          <body style="margin: 0; padding: 0; font-family: Arial, sans-serif; background-color: #f4f4f4;">
+            <div style="max-width: 600px; margin: 0 auto; background-color: #ffffff; padding: 20px; border-radius: 10px; box-shadow: 0 0 10px rgba(0,0,0,0.1);">
+              <div style="text-align: center; padding: 20px;">
+                <img src="${this.configService.get('APP_LOGO_URL', 'https://tulogo.png')}" alt="GameLab Logo" style="max-width: 150px;">
+              </div>
+              
+              <div style="padding: 20px; color: #333333;">
+                <h1 style="color: #2C3E50; text-align: center;">¡Bienvenido a GameLab!</h1>
+                
+                <p style="font-size: 16px; line-height: 1.6;">
+                  Has sido seleccionado como jurado para evaluar los proyectos de videojuegos en nuestra plataforma. Tu experiencia y conocimiento serán fundamentales para valorar el trabajo de nuestros estudiantes.
+                </p>
+
+                <div style="background-color: #f8f9fa; border-left: 4px solid #2C3E50; padding: 15px; margin: 20px 0;">
+                  <p style="margin: 0; color: #666;">
+                    Como jurado podrás:
+                    <ul style="color: #666;">
+                      <li>Evaluar proyectos de videojuegos</li>
+                      <li>Proporcionar retroalimentación valiosa</li>
+                      <li>Contribuir al desarrollo de futuros talentos</li>
+                    </ul>
+                  </p>
+                </div>
+
+                <div style="text-align: center; margin: 30px 0;">
+                  <a href="${confirmUrl}" 
+                     style="background-color: #2C3E50; 
+                            color: white; 
+                            padding: 12px 30px; 
+                            text-decoration: none; 
+                            border-radius: 5px; 
+                            font-weight: bold;
+                            display: inline-block;">
+                    Aceptar Invitación
+                  </a>
+                </div>
+
+                <p style="font-size: 14px; color: #666; text-align: center; margin-top: 30px;">
+                  Si tienes alguna pregunta, no dudes en contactarnos respondiendo este correo.
+                </p>
+              </div>
+
+              <div style="text-align: center; padding-top: 20px; border-top: 1px solid #eeeeee; margin-top: 20px;">
+                <p style="color: #666; font-size: 12px;">
+                  Este es un correo automático. Por favor, no respondas directamente a este mensaje.
+                </p>
+              </div>
+            </div>
+          </body>
+        </html>
       `
     });
   }
