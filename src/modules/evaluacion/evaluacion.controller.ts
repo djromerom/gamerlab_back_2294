@@ -1,44 +1,69 @@
-import { Controller, Get, Post, Param, Body, Req, UseGuards } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Param,
+  Body,
+  Req,
+  UseGuards,
+} from '@nestjs/common';
 import { EvaluacionService } from './evaluacion.service';
 import { CreateEvaluacionDto } from './dto/create-evaluacion.dto';
-import { PrismaService } from '../../prisma/prisma.service';
-// import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard'; // descomentar cuando ya este el auth
-// import { AuthenticatedRequest } from 'src/auth/types'; // descomentar si se definen tipos personalizados
+import { EvaluacionEntity } from './entities/evaluacion.entity';
+import { ApiTags, ApiResponse } from '@nestjs/swagger';
+// import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
+// import { AuthenticatedRequest } from 'src/auth/types';
 
+@ApiTags('Evaluaciones')
 @Controller('evaluaciones')
 // @UseGuards(JwtAuthGuard, RolesGuard))
 // @Roles('jurado')
 export class EvaluacionController {
   constructor(private readonly evaluacionService: EvaluacionService) {}
 
-  // Listar videojuegos asignados al jurado (no evaluados)
   @Get('asignadas')
+  @ApiResponse({ status: 200, description: 'Videojuegos asignados' })
   async getVideojuegosAsignados(@Req() req /*: AuthenticatedRequest */) {
-    const juradoId = req.user?.id || 1; // reemplazar por req.user.id si el JWT esta activo
+    const juradoId = req.user?.id || 1;
     return this.evaluacionService.getVideojuegosAsignados(juradoId);
   }
 
-  // Listar evaluaciones ya realizadas
   @Get('realizadas')
+  @ApiResponse({
+    status: 200,
+    description: 'Evaluaciones realizadas',
+    type: [EvaluacionEntity],
+  })
   async getEvaluacionesHechas(@Req() req /*: AuthenticatedRequest */) {
     const juradoId = req.user?.id || 1;
     return this.evaluacionService.getEvaluacionesHechas(juradoId);
   }
 
   @Get(':id')
-async getEvaluacionPorId(@Param('id') id: string) {
-  return this.evaluacionService.getEvaluacionPorId(Number(id));
-}
+  @ApiResponse({
+    status: 200,
+    description: 'Detalle de evaluación',
+    type: EvaluacionEntity,
+  })
+  async getEvaluacionPorId(@Param('id') id: string) {
+    return this.evaluacionService.getEvaluacionPorId(Number(id));
+  }
 
-// evaluacion.controller.ts
-@Get('videojuego/:id')
-async getEvaluacionesPorVideojuego(@Param('id') id: string) {
-  return this.evaluacionService.getEvaluacionesPorVideojuego(Number(id));
-}
+  @Get('videojuego/:id')
+  @ApiResponse({
+    status: 200,
+    description: 'Evaluaciones de un videojuego',
+  })
+  async getEvaluacionesPorVideojuego(@Param('id') id: string) {
+    return this.evaluacionService.getEvaluacionesPorVideojuego(Number(id));
+  }
 
-
-  // Crear nueva evaluación para un videojuego asignado
   @Post(':videojuegoId')
+  @ApiResponse({
+    status: 201,
+    description: 'Evaluación creada',
+    type: EvaluacionEntity,
+  })
   async crearEvaluacion(
     @Param('videojuegoId') videojuegoId: string,
     @Req() req /*: AuthenticatedRequest */,

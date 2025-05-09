@@ -1,17 +1,22 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { Exclude } from 'class-transformer';
+import { Exclude, Expose, Type } from 'class-transformer';
+import { CriterioEntity } from './criterio.entity';
 
 export class RubricaEntity {
   @ApiProperty()
+  @Expose()
   id_criterio: number;
 
   @ApiProperty()
+  @Expose()
   valoracion: number;
 
   @ApiProperty({
     type: () => CriterioEntity,
     description: 'Datos del criterio asociado',
   })
+  @Expose()
+  @Type(() => CriterioEntity)
   criterio: CriterioEntity;
 
   @Exclude()
@@ -28,17 +33,4 @@ export class RubricaEntity {
   }
 }
 
-class CriterioEntity {
-  @ApiProperty()
-  id: number;
 
-  @ApiProperty()
-  nombre: string;
-
-  @ApiProperty()
-  descripcion: string;
-
-  constructor(partial: Partial<CriterioEntity>) {
-    Object.assign(this, partial);
-  }
-}
