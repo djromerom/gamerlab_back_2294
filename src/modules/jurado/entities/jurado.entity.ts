@@ -2,6 +2,7 @@ import { Jurado as JuradoPrisma, EstadoJurado } from "@prisma/client";
 import { ApiProperty } from "@nestjs/swagger";
 import { Exclude } from "class-transformer";
 import { Usuario } from "@prisma/client";
+import { ValidateNested } from "class-validator";
 
 export class JuradoEntity implements JuradoPrisma {
   @ApiProperty()
@@ -13,22 +14,23 @@ export class JuradoEntity implements JuradoPrisma {
   @ApiProperty({ enum: EstadoJurado })
   estado: EstadoJurado;
 
-  @ApiProperty()
+  @Exclude()
   token_confirmacion: string;
 
   @ApiProperty()
   ultima_conexion: Date;
 
-  @ApiProperty()
+  @Exclude()
   create_at: Date;
 
-  @ApiProperty()
+  @Exclude()
   update_at: Date;
 
   @Exclude()
   deleted: boolean;
 
   @ApiProperty({ required: false })
+  @ValidateNested()
   usuario?: Usuario;
 
   @ApiProperty({ isArray: true, required: false })

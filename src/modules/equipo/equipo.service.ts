@@ -98,17 +98,27 @@ export class EquipoService {
   }
 
   async findOne(id: number) {
-    const equipo = await this.prisma.equipo.findUnique({
-      where: {
-        id: id,
-        deleted: false,
+  const equipo = await this.prisma.equipo.findUnique({
+    where: {
+      id: id,
+      deleted: false,
+    },
+    include: {
+      estudiantes: {
+        where: { deleted: false },
+        include: {
+          usuario: true
+        }
       },
-    });
+      videojuegos: {
+        where: { deleted: false }
+      }
+    }
+  });
 
-    this.exits.validateExists('equipo', equipo);
-
-    return equipo;
-  }
+  this.exits.validateExists('equipo', equipo);
+  return equipo;
+}
 
   async update(id: number, updateEquipoDto: UpdateEquipoDto) {
     const equipo = await this.prisma.equipo.findUnique({
@@ -126,6 +136,25 @@ export class EquipoService {
         deleted: false,
       },
       data: updateEquipoDto,
+      include: {
+        estudiantes: {
+          where: { deleted: false },
+          include: {
+            usuario: true,
+            estudianteNrcs: {
+              where: { deleted: false },
+              include: {
+                nrc: {
+                  include: { materia: true },
+                },
+              },
+            },
+          },
+        },
+        videojuegos: {
+          where: { deleted: false },
+        },
+      }
     });
   }
 
@@ -151,7 +180,7 @@ export class EquipoService {
       },
     });
 
-    this.prisma.estudiante.updateMany({
+    await this.prisma.estudiante.updateMany({
       where: {
         equipo_id: id,
         deleted: false,
@@ -161,7 +190,7 @@ export class EquipoService {
       },
     });
 
-    return this.prisma.equipo.update({
+    await this.prisma.equipo.update({
       where: { id },
       data: {
         deleted: true,
@@ -182,6 +211,10 @@ export class EquipoService {
     return this.prisma.equipo.update({
       where: { id: idequipo },
       data: { estado },
+      include: {
+        estudiantes: true,
+        videojuegos: true,
+      },
     });
   }
 

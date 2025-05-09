@@ -4,40 +4,36 @@ import { UpdateJuradoDto } from './dto/update-jurado.dto';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { ValidationExitsService } from 'src/common/services/validation-exits.service';
 import { EstadoJurado } from '@prisma/client';
-import { randomBytes } from 'crypto';
 import { EmailService } from '../email/email.service'; 
+import { GenerateTokenService } from 'src/common/services/generateToken.service';
+
 @Injectable()
 export class JuradoService {
-    constructor(
-        private prisma: PrismaService, 
-        private validationExits: ValidationExitsService,
-        private emailService: EmailService  // Añadir esta línea
-      ) {}
+  constructor(
+      private prisma: PrismaService, 
+      private validationExits: ValidationExitsService,
+      private emailService: EmailService,
+      private generateTokenService: GenerateTokenService
+  ) {}
       
-      /**
-       * Envía un email de invitación a un jurado
-       */
-      async enviarInvitacion(id: number) {
-        const jurado = await this.findOne(id);
-        
-        if (!jurado || !jurado.usuario) {
-          throw new HttpException('Jurado no encontrado', HttpStatus.NOT_FOUND);
-        }
-        
-        const baseUrl = process.env.APP_URL || 'http://localhost:3000';
-        const confirmationUrl = `${baseUrl}/jurado/confirmar/${jurado.token_confirmacion}`;
-        
-        // Formato adecuado para el EmailService
-        return this.emailService.sendJuradoInvitation({
-          email: jurado.usuario.email,
-          token: jurado.token_confirmacion,
-        });
-      }
   /**
-   * Genera un token aleatorio para confirmación
+   * Envía un email de invitación a un jurado
    */
-  generateToken(): string {
-    return randomBytes(32).toString('hex');
+  async enviarInvitacion(id: number) {
+    const jurado = await this.findOne(id);
+    
+    if (!jurado || !jurado.usuario) {
+      throw new HttpException('Jurado no encontrado', HttpStatus.NOT_FOUND);
+    }
+
+    if (jurado.estado === EstadoJurado.confirmado) {
+      throw new HttpException('El jurado ya está confirmado', HttpStatus.BAD_REQUEST);
+    }
+    
+    return this.emailService.sendJuradoInvitation({
+      email: jurado.usuario.email,
+      token: jurado.token_confirmacion,
+    });
   }
 
   /**
@@ -68,7 +64,7 @@ export class JuradoService {
 
     // Si no hay token de confirmación, generamos uno
     if (!createJuradoDto.token_confirmacion) {
-      createJuradoDto.token_confirmacion = this.generateToken();
+      createJuradoDto.token_confirmacion = this.generateTokenService.generateToken();
     }
 
     return this.prisma.jurado.create({
@@ -237,19 +233,11 @@ export class JuradoService {
    * Reasigna un token a un jurado y actualiza su estado
    */
   async reenviarInvitacion(id: number) {
-    const jurado = await this.prisma.jurado.findFirst({
-      where: {
-        id,
-        deleted: false
-      },
-      include: {
-        usuario: true
-      }
-    });
+    const jurado = await this.findOne(id);
 
     this.validationExits.validateExists('jurado', jurado);
 
-    const newToken = this.generateToken();
+    const newToken = this.generateTokenService.generateToken();
 
     return this.prisma.jurado.update({
       where: { id },
