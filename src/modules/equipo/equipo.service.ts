@@ -136,6 +136,25 @@ export class EquipoService {
         deleted: false,
       },
       data: updateEquipoDto,
+      include: {
+        estudiantes: {
+          where: { deleted: false },
+          include: {
+            usuario: true,
+            estudianteNrcs: {
+              where: { deleted: false },
+              include: {
+                nrc: {
+                  include: { materia: true },
+                },
+              },
+            },
+          },
+        },
+        videojuegos: {
+          where: { deleted: false },
+        },
+      }
     });
   }
 
@@ -161,7 +180,7 @@ export class EquipoService {
       },
     });
 
-    this.prisma.estudiante.updateMany({
+    await this.prisma.estudiante.updateMany({
       where: {
         equipo_id: id,
         deleted: false,
@@ -171,7 +190,7 @@ export class EquipoService {
       },
     });
 
-    return this.prisma.equipo.update({
+    await this.prisma.equipo.update({
       where: { id },
       data: {
         deleted: true,
@@ -192,6 +211,10 @@ export class EquipoService {
     return this.prisma.equipo.update({
       where: { id: idequipo },
       data: { estado },
+      include: {
+        estudiantes: true,
+        videojuegos: true,
+      },
     });
   }
 
