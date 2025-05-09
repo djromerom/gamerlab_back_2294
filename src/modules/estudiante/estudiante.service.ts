@@ -4,21 +4,17 @@ import { ValidationExitsService } from 'src/common/services/validation-exits.ser
 import { CreateEstudianteDto } from './dto/create-estudiante.dto';
 import { UpdateEstudianteDto } from './dto/update-estudiante.dto';
 import { EstudianteEntity } from './entities/estudiante.entity';
-import { randomBytes } from 'crypto';
 import { EmailService } from 'src/modules/email/email.service';
+import { GenerateTokenService } from 'src/common/services/generateToken.service';
 
 @Injectable()
 export class EstudianteService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly exits: ValidationExitsService,
-    private readonly emailService: EmailService
+    private readonly emailService: EmailService,
+    private readonly generateTokenService: GenerateTokenService
   ) { }
-
-  // Genera token para confirmación
-  private generateToken(): string {
-    return randomBytes(32).toString('hex');
-  }
 
   async create(id_equipo: number, createEstudianteDto: CreateEstudianteDto) {
 
@@ -57,7 +53,7 @@ export class EstudianteService {
     }
 
     // Generar token para la confirmación por correo
-    const confirmationToken = this.generateToken();
+    const confirmationToken = this.generateTokenService.generateToken();
 
     // Guardar el token en algún lugar (podríamos añadir una tabla de tokens o usar Redis)
     // Por ahora, lo guardaremos en el mismo estudiante
@@ -88,7 +84,6 @@ export class EstudianteService {
       createEstudianteDto.map(estudiante => this.create(id_equipo, estudiante))
     );
 
-    console.log(estudiantes);
     // enviar correo de confirmación a todos los estudiantes
     await this.emailService.sendConfirmationEmail(
       {
