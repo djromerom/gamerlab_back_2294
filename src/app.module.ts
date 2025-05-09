@@ -7,7 +7,8 @@ import { MateriaModule } from './modules/materia/materia.module';
 import { NrcModule } from './modules/nrc/nrc.module';
 // import { StorageModule } from './modules/storage/storage.module'; // Keep this commented if you're having issues with Supabase
 import { JuradoModule } from './modules/jurado/jurado.module';
-
+import { StorageModule } from './modules/storage/storage.module'
+import { EvaluacionModule } from './modules/evaluacion/evaluacion.module'
 
 @Module({
   imports: [
@@ -15,6 +16,7 @@ import { JuradoModule } from './modules/jurado/jurado.module';
       isGlobal: true,
       envFilePath: '.env',
     }),
+    EvaluacionModule,
     EquipoModule, 
     VideojuegoModule, 
     EstudianteModule,
