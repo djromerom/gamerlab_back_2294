@@ -22,6 +22,10 @@ export class ReportsController {
     const wb = await this.reportsService.getAverageRatingsWorkbook(
       filter.videojuegos,
     );
-    return new StreamableFile(await wb.writeToBuffer());
+
+    return new StreamableFile(await wb.writeToBuffer(), {
+      type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+      disposition: 'attachment; filename="Ratings.xlsx"',
+    });
   }
 }
