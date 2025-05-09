@@ -6,6 +6,7 @@ import { EstudianteModule } from './modules/estudiante/estudiante.module';
 import { MateriaModule } from './modules/materia/materia.module';
 import { NrcModule } from './modules/nrc/nrc.module';
 import { StorageModule } from './modules/storage/storage.module'
+import { EvaluacionModule } from './modules/evaluacion/evaluacion.module'
 
 @Module({
   imports: [
@@ -13,11 +14,12 @@ import { StorageModule } from './modules/storage/storage.module'
       isGlobal: true,
       envFilePath: '.env',
     }),
-    EquipoModule, 
+    EvaluacionModule,
+    /*EquipoModule, 
     VideojuegoModule, 
     EstudianteModule,
     MateriaModule,
-    NrcModule,
+    NrcModule,*/
   ],
   providers: [],
 })

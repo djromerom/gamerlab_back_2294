@@ -13,6 +13,7 @@ class RubricaDto {
 
 export class CreateEvaluacionDto {
   @IsString()
+  @IsNotEmpty()
   comentarios: string;
 
   @IsArray()
