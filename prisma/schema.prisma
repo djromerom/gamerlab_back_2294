@@ -14,7 +14,7 @@ model Usuario {
   email           String       @unique
   hash_contrasena String
   create_at       DateTime     @default(now())
-  update_at       DateTime     @default(now())
+  update_at       DateTime     @default(now()) @updatedAt
   deleted         Boolean      @default(false)
   estudiante      Estudiante?
   jurado          Jurado?
@@ -55,7 +55,7 @@ model Jurado {
   token_confirmacion String
   ultima_conexion    DateTime
   create_at          DateTime             @default(now())
-  update_at          DateTime             @default(now())
+  update_at          DateTime             @default(now()) @updatedAt
   deleted            Boolean              @default(false)
   evaluaciones       Evaluacion[]
   usuario            Usuario              @relation(fields: [id_user], references: [id])
@@ -103,7 +103,7 @@ model Materia {
   nombre    String
   codigo    String   @unique
   create_at DateTime @default(now())
-  update_at DateTime @default(now())
+  update_at DateTime @default(now()) @updatedAt
   deleted   Boolean  @default(false)
   nrcs      NRC[]
 }
@@ -113,7 +113,7 @@ model NRC {
   materia_id     Int
   profesor_id    Int
   create_at      DateTime        @default(now())
-  update_at      DateTime        @default(now())
+  update_at      DateTime        @default(now()) @updatedAt
   deleted        Boolean         @default(false)
   estudianteNrcs EstudianteNRC[]
   materia        Materia         @relation(fields: [materia_id], references: [id])
@@ -126,7 +126,7 @@ model Evaluacion {
   videojuego_id Int
   comentarios   String
   create_at     DateTime   @default(now())
-  update_at     DateTime   @default(now())
+  update_at     DateTime   @default(now()) @updatedAt
   deleted       Boolean    @default(false)
   jurado        Jurado     @relation(fields: [jurado_id], references: [id])
   videojuego    Videojuego @relation(fields: [videojuego_id], references: [id])
@@ -140,7 +140,7 @@ model Criterio {
   nombre      String
   descripcion String
   create_at   DateTime  @default(now())
-  update_at   DateTime  @default(now())
+  update_at   DateTime  @default(now()) @updatedAt
   deleted     Boolean   @default(false)
   rubricas    Rubrica[]
 }
@@ -184,7 +184,7 @@ model Endpoint {
   metodo         Tipo
   num_parametros Int
   create_at      DateTime      @default(now())
-  update_at      DateTime      @default(now())
+  update_at      DateTime      @default(now()) @updatedAt
   deleted        Boolean       @default(false)
   roles          RolEndpoint[]
 }
