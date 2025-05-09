@@ -1,5 +1,5 @@
 import { RubricaEntity } from './rubrica.entity';
-import { VideoJuegoEntity } from "src/modules/videojuego/entities/videojuego.entity";
+//import { VideoJuegoEntity } from "src/modules/videojuego/entities/videojuego.entity";
 import { ApiProperty } from '@nestjs/swagger';
 
 export class EvaluacionEntity {
@@ -21,8 +21,8 @@ export class EvaluacionEntity {
   @ApiProperty()
   rubricas: RubricaEntity[];
 
-  @ApiProperty()
-  videojuego: VideoJuegoEntity;
+  /*@ApiProperty()
+  videojuego: VideoJuegoEntity;*/
 
   constructor(partial: Partial<EvaluacionEntity>) {
     Object.assign(this, partial);
