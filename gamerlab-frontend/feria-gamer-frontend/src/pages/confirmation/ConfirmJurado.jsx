@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Container, Alert, Card, Button } from 'react-bootstrap';
+import { Container, Alert, Card } from 'react-bootstrap';
 import { useParams, Link } from 'react-router-dom';
 import { confirmarJurado } from '../../api/juradoApi';
 import LoadingSpinner from '../../components/common/LoadingSpinner';

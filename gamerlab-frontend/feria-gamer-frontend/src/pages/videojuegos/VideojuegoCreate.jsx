@@ -1,11 +1,10 @@
 import React, { useState } from 'react';
 import { Container, Alert, Card, Button } from 'react-bootstrap';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import VideojuegoForm from '../../components/forms/VideojuegoForm';
 import { createVideojuego } from '../../api/videojuegoApi';
 
 const VideojuegoCreate = () => {
-  const navigate = useNavigate();
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState(null);
   const [success, setSuccess] = useState(false);

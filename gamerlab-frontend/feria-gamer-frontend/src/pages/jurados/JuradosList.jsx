@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Container, Row, Col, Card, Button, Badge, Alert, Table } from 'react-bootstrap';
+import { Container, Button, Badge, Alert, Table } from 'react-bootstrap';
 import { Link } from 'react-router-dom';
 import { getAllJurados, reenviarInvitacion } from '../../api/juradoApi';
 import LoadingSpinner from '../../components/common/LoadingSpinner';
@@ -9,7 +9,7 @@ const JuradosList = () => {
   const [jurados, setJurados] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [actionLoading, setActionLoading] = useState(false);
+  const [ setActionLoading] = useState(false);
   const [selectedJurado, setSelectedJurado] = useState(null);
   const [showReenviarModal, setShowReenviarModal] = useState(false);
 

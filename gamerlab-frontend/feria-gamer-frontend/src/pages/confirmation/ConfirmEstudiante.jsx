@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import { Container, Alert, Card, Button } from 'react-bootstrap';
+import  { useState, useEffect } from 'react';
+import { Container, Alert, Card } from 'react-bootstrap';
 import { useSearchParams, Link } from 'react-router-dom';
 import { confirmarEstudiante } from '../../api/equipoApi';
 import LoadingSpinner from '../../components/common/LoadingSpinner';
@@ -10,7 +10,7 @@ const ConfirmEstudiante = () => {
 
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
-    const [success, setSuccess] = useState(false);
+    const [ setSuccess] = useState(false);
     const [studentInfo, setStudentInfo] = useState(null);
 
     useEffect(() => {

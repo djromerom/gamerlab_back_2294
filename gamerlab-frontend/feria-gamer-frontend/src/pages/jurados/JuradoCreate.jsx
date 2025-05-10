@@ -1,11 +1,11 @@
 import React, { useState } from 'react';
 import { Container, Alert, Card, Button } from 'react-bootstrap';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import JuradoForm from '../../components/forms/JuradoForm';
 import { createJurado } from '../../api/juradoApi';
 
 const JuradoCreate = () => {
-  const navigate = useNavigate();
+ 
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState(null);
   const [success, setSuccess] = useState(false);
