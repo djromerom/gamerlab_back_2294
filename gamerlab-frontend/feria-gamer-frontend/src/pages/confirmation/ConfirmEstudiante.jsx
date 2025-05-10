@@ -1,4 +1,4 @@
-import  { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { Container, Alert, Card } from 'react-bootstrap';
 import { useSearchParams, Link } from 'react-router-dom';
 import { confirmarEstudiante } from '../../api/equipoApi';
@@ -7,14 +7,22 @@ import LoadingSpinner from '../../components/common/LoadingSpinner';
 const ConfirmEstudiante = () => {
     const [searchParams] = useSearchParams();
     const token = searchParams.get('token');
+    const errorParam = searchParams.get('error');
 
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
-    const [ setSuccess] = useState(false);
+    const [success, setSuccess] = useState(false);
     const [studentInfo, setStudentInfo] = useState(null);
 
     useEffect(() => {
-        const confirmRegistration = async () => {
+        // Si ya hay un error en los parámetros (redirigido desde backend con error)
+        if (errorParam) {
+            setError(decodeURIComponent(errorParam));
+            setLoading(false);
+            return;
+        }
+
+        const fetchStudentInfo = async () => {
             if (!token) {
                 setError('Token de confirmación no proporcionado');
                 setLoading(false);
@@ -22,18 +30,29 @@ const ConfirmEstudiante = () => {
             }
 
             try {
-                const data = await confirmarEstudiante(token);
+                // En lugar de confirmar, solo obtenemos información del estudiante
+                const response = await fetch(`http://localhost:3000/api/v1/equipo/estudiante-by-token?token=${token}`);
+                
+                if (!response.ok) {
+                    throw new Error(`Error ${response.status}: ${response.statusText}`);
+                }
+                
+                const data = await response.json();
                 setSuccess(true);
                 setStudentInfo(data);
             } catch (err) {
-                setError('Error al confirmar registro: ' + (err.response?.data?.message || err.message));
+                setError('Error al obtener información: ' + (err.message));
             } finally {
                 setLoading(false);
             }
         };
 
-        confirmRegistration();
-    }, [token]);
+        fetchStudentInfo();
+    }, [token, errorParam]);
+
+    
+
+
 
     if (loading) {
         return <LoadingSpinner text="Procesando confirmación..." />;

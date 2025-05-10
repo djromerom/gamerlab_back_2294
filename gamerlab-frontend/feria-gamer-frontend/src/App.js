@@ -43,7 +43,7 @@ function App() {
             <Container>
               <Routes>
                 <Route path="/" element={<Home />} />
-                
+                <Route path="/confirm-estudiante" element={<ConfirmEstudiante />} />
                 {/* Equipos Routes */}
                 <Route path="/equipos" element={<EquiposList />} />
                 <Route path="/equipos/crear" element={<EquipoCreate />} />
