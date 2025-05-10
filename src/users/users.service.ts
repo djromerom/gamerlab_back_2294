@@ -64,5 +64,75 @@ export class UsuariosService {
 
     return usuario;
   }
+
+  async getEquiposbyNRC(id_user: number) {
+    // validar que el usuario existe y no esta eliminado y sea un profesor
+    const usuario = await this.prismaService.usuario.findUnique({
+      where: { id: id_user },
+      include: {
+        roles: true
+      },
+    });
+
+    if (!usuario || usuario.deleted) {
+      throw new NotFoundException(`Usuario con id ${id_user} no encontrado o inactivo`);
+    }
+
+    // validar que el usuario sea un profesor
+    const roles = usuario.roles.map((rol) => rol.id_rol);
+    const informacionRol = await this.prismaService.rol.findMany({
+      where: {
+        id: { in: roles },
+        deleted: false,
+      },
+    });
+
+    const esProfesor = informacionRol.some((rol) => rol.nombre === 'PROFESOR');
+    if (!esProfesor) {
+      throw new NotFoundException(`Usuario con id ${id_user} no es un profesor`);
+    }
+
+    // obtener los estudiantes del usuario
+    const nrcs = await this.prismaService.nRC.findMany({
+      where: {
+        profesor_id: id_user,
+        deleted: false,
+      },
+      include: {
+        estudianteNrcs: {
+          include: {
+            estudiante: {
+              include: {
+                equipo: true
+              }
+            }
+          },
+        }
+      }
+    });
+    
+    // obtener todos los equipos de los estudiantes
+    const equipos = nrcs.flatMap((nrc) =>
+      nrc.estudianteNrcs.map((estudianteNrc) => ({
+        codigo_nrc: nrc.codigo_nrc,
+        equipo: estudianteNrc.estudiante.equipo,
+      })),
+    );
+
+    // filtrar los equipos que no son nulos
+    const equiposFiltrados = equipos.filter((equipo) => equipo.equipo !== null);
+
+    // eliminar duplicados
+    const equiposUnicos = equiposFiltrados.filter((equipo, index, self) =>
+      index === self.findIndex((e) => e.equipo.id === equipo.equipo.id),
+    );
+
+    // retornar los equipos
+    return equiposUnicos.map((equipo) => ({
+      id_equipo: equipo.equipo.id,
+      nombre_equipo: equipo.equipo.nombre_equipo,
+      codigo_nrc: equipo.codigo_nrc,
+    }));
+  }
   
 }

@@ -90,6 +90,21 @@ export class EquipoService {
         },
         videojuegos: {
           where: { deleted: false },
+          include: {
+            evaluaciones: {
+              where: { deleted: false },
+              include: {
+                rubricas: {
+                  include: {
+                    criterio: true,
+                  },
+                  where: {
+                    deleted: false,
+                  }
+                },
+              },
+            },
+          },
         },
       },
     });
@@ -111,7 +126,22 @@ export class EquipoService {
         }
       },
       videojuegos: {
-        where: { deleted: false }
+        where: { deleted: false },
+        include: {
+          evaluaciones: {
+            where: { deleted: false },
+            include: {
+              rubricas: {
+                include: {
+                  criterio: true,
+                },
+                where: {
+                  deleted: false,
+                }
+              },
+            },
+          },
+        },
       }
     }
   });

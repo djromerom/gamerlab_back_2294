@@ -18,12 +18,12 @@ export class EquipoEntity {
   @ApiProperty({enum: Estado, enumName: 'Estado'})
   estado: Estado;
 
-  @ApiProperty()
+  @ApiProperty( { type: [VideoJuegoEntity] })
   @ValidateNested({ each: true })
   @Type(() => VideoJuegoEntity)
   videojuegos: VideoJuegoEntity[];
 
-  @ApiProperty()
+  @ApiProperty( { type: [EstudianteEntity] })
   @ValidateNested({ each: true })
   @Type(() => EstudianteEntity)
   estudiantes: EstudianteEntity[];

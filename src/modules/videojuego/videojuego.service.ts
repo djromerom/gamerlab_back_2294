@@ -48,7 +48,17 @@ export class VideojuegoService {
           equipo_id: equipo_id,
         },
         take: limit || undefined,
-      });
+        include: {
+          evaluaciones: {
+            include: {
+              rubricas: {
+                include: {
+                  criterio: true,
+                },
+              },
+            },  
+          },
+      }});
     }
     // Si no se proporciona un ID de equipo, devolver todos los videojuegos
     return this.prisma.videojuego.findMany({
@@ -56,6 +66,17 @@ export class VideojuegoService {
         deleted: false,
       },
       take: limit || undefined,
+      include: {
+          evaluaciones: {
+            include: {
+              rubricas: {
+                include: {
+                  criterio: true,
+                },
+              },
+            },  
+          },
+      },
     });
   }
 
@@ -64,6 +85,17 @@ export class VideojuegoService {
       where: {
         id,
         deleted: false,
+      },
+      include: {
+          evaluaciones: {
+            include: {
+              rubricas: {
+                include: {
+                  criterio: true,
+                },
+              },
+            },  
+          },
       },
     });
 

@@ -38,4 +38,9 @@ export class UsuariosController {
   deleteUsuario(@Param('id') id: string) {
     return this.usuariosService.deleteUsuario(Number(id));
   }
+
+  @Get('me/:id/equipos')
+  getEquiposByUsuario(@Param('id') id: number) {
+    return this.usuariosService.getEquiposbyNRC(id);
+  }
 }

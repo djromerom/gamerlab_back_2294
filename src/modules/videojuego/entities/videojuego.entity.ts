@@ -1,6 +1,8 @@
 import { Videojuego } from "@prisma/client";
 import { ApiProperty } from "@nestjs/swagger";
-import { Exclude } from "class-transformer";
+import { Exclude, Expose, Type } from "class-transformer";
+import { EvaluacionEntity } from "src/modules/evaluacion/entities/evaluacion.entity";
+import { ValidateNested } from "class-validator";
 
 export class VideoJuegoEntity implements Videojuego {
   @ApiProperty()
@@ -14,6 +16,12 @@ export class VideoJuegoEntity implements Videojuego {
 
   @ApiProperty()
   equipo_id: number
+
+  @ApiProperty({ type: [EvaluacionEntity] })
+  @Expose()
+  @ValidateNested({ each: true })
+  @Type(() => EvaluacionEntity)
+  evaluaciones: EvaluacionEntity[];
 
   @Exclude()
   create_at: Date;  
