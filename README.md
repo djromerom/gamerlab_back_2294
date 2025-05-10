@@ -1,98 +1,121 @@
-<p align="center">
-  <a href="http://nestjs.com/" target="blank"><img src="https://nestjs.com/img/logo-small.svg" width="120" alt="Nest Logo" /></a>
-</p>
+# 🎮 GamerLab - Plataforma de Gestión de Videojuegos Académicos
 
-[circleci-image]: https://img.shields.io/circleci/build/github/nestjs/nest/master?token=abc123def456
-[circleci-url]: https://circleci.com/gh/nestjs/nest
+Sistema web para gestionar el proceso de inscripción, evaluación y seguimiento de videojuegos desarrollados por estudiantes.
 
-  <p align="center">A progressive <a href="http://nodejs.org" target="_blank">Node.js</a> framework for building efficient and scalable server-side applications.</p>
-    <p align="center">
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/v/@nestjs/core.svg" alt="NPM Version" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/l/@nestjs/core.svg" alt="Package License" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/dm/@nestjs/common.svg" alt="NPM Downloads" /></a>
-<a href="https://circleci.com/gh/nestjs/nest" target="_blank"><img src="https://img.shields.io/circleci/build/github/nestjs/nest/master" alt="CircleCI" /></a>
-<a href="https://discord.gg/G7Qnnhy" target="_blank"><img src="https://img.shields.io/badge/discord-online-brightgreen.svg" alt="Discord"/></a>
-<a href="https://opencollective.com/nest#backer" target="_blank"><img src="https://opencollective.com/nest/backers/badge.svg" alt="Backers on Open Collective" /></a>
-<a href="https://opencollective.com/nest#sponsor" target="_blank"><img src="https://opencollective.com/nest/sponsors/badge.svg" alt="Sponsors on Open Collective" /></a>
-  <a href="https://paypal.me/kamilmysliwiec" target="_blank"><img src="https://img.shields.io/badge/Donate-PayPal-ff3f59.svg" alt="Donate us"/></a>
-    <a href="https://opencollective.com/nest#sponsor"  target="_blank"><img src="https://img.shields.io/badge/Support%20us-Open%20Collective-41B883.svg" alt="Support us"></a>
-  <a href="https://twitter.com/nestframework" target="_blank"><img src="https://img.shields.io/twitter/follow/nestframework.svg?style=social&label=Follow" alt="Follow us on Twitter"></a>
-</p>
-  <!--[![Backers on Open Collective](https://opencollective.com/nest/backers/badge.svg)](https://opencollective.com/nest#backer)
-  [![Sponsors on Open Collective](https://opencollective.com/nest/sponsors/badge.svg)](https://opencollective.com/nest#sponsor)-->
+## 🚀 Características Principales
 
-## Description
+### Para Estudiantes
 
-[Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
+- Registro de equipos de desarrollo
+- Inscripción de videojuegos
+- Sistema de confirmación por email
+- Seguimiento del estado de inscripción
 
-## Project setup
+### Para Jurados
 
-```bash
-$ npm install
-```
+- Portal dedicado para evaluación
+- Sistema de calificación con rúbricas predefinidas
+- Visualización de proyectos asignados
+- Gestión de evaluaciones realizadas
 
-## Compile and run the project
+### Para Administradores
 
-```bash
-# development
-$ npm run start
+- Panel de control centralizado
+- Gestión de materias y NRCs
+- Administración de jurados
+- Monitoreo en tiempo real del evento
+- Generación de reportes y estadísticas
 
-# watch mode
-$ npm run start:dev
+## 🛠️ Tecnologías
 
-# production mode
-$ npm run start:prod
-```
+- Backend:
+  - NestJS (Node.js framework)
+  - TypeScript
+  - PostgreSQL (vía Prisma ORM)
+  - JWT para autenticación
+  - Nodemailer para emails
 
-## Run tests
+- Frontend:
+  - React/Vue.js (próximamente)
+  - Tailwind CSS
+  - Chart.js para visualizaciones
+
+## 📦 Instalación
+
+1. Clona el repositorio:
 
 ```bash
-# unit tests
-$ npm run test
-
-# e2e tests
-$ npm run test:e2e
-
-# test coverage
-$ npm run test:cov
+git clone https://github.com/djromeron/gamerlab_back.git
 ```
 
-## Deployment
-
-When you're ready to deploy your NestJS application to production, there are some key steps you can take to ensure it runs as efficiently as possible. Check out the [deployment documentation](https://docs.nestjs.com/deployment) for more information.
-
-If you are looking for a cloud-based platform to deploy your NestJS application, check out [Mau](https://mau.nestjs.com), our official platform for deploying NestJS applications on AWS. Mau makes deployment straightforward and fast, requiring just a few simple steps:
+2. Instala las dependencias:
 
 ```bash
-$ npm install -g @nestjs/mau
-$ mau deploy
+npm install
 ```
 
-With Mau, you can deploy your application in just a few clicks, allowing you to focus on building features rather than managing infrastructure.
+3. Configura las variables de entorno:
 
-## Resources
+```bash
+cp .env.example .env
+# Edita .env con tus credenciales
+```
 
-Check out a few resources that may come in handy when working with NestJS:
+4. Ejecuta las migraciones:
 
-- Visit the [NestJS Documentation](https://docs.nestjs.com) to learn more about the framework.
-- For questions and support, please visit our [Discord channel](https://discord.gg/G7Qnnhy).
-- To dive deeper and get more hands-on experience, check out our official video [courses](https://courses.nestjs.com/).
-- Deploy your application to AWS with the help of [NestJS Mau](https://mau.nestjs.com) in just a few clicks.
-- Visualize your application graph and interact with the NestJS application in real-time using [NestJS Devtools](https://devtools.nestjs.com).
-- Need help with your project (part-time to full-time)? Check out our official [enterprise support](https://enterprise.nestjs.com).
-- To stay in the loop and get updates, follow us on [X](https://x.com/nestframework) and [LinkedIn](https://linkedin.com/company/nestjs).
-- Looking for a job, or have a job to offer? Check out our official [Jobs board](https://jobs.nestjs.com).
+```bash
+npx prisma migrate dev
+```
 
-## Support
+5. Inicia el servidor:
 
-Nest is an MIT-licensed open source project. It can grow thanks to the sponsors and support by the amazing backers. If you'd like to join them, please [read more here](https://docs.nestjs.com/support).
+```bash
+npm run start:dev
+```
 
-## Stay in touch
+## 🗄️ Estructura del Proyecto
 
-- Author - [Kamil Myśliwiec](https://twitter.com/kammysliwiec)
-- Website - [https://nestjs.com](https://nestjs.com/)
-- Twitter - [@nestframework](https://twitter.com/nestframework)
+```
+src/
+├── modules/           # Módulos principales
+│   ├── equipo/       # Gestión de equipos
+│   ├── estudiante/   # Gestión de estudiantes
+│   ├── videojuego/   # Gestión de videojuegos
+│   └── jurado/       # Gestión de jurados
+├── common/           # Código compartido
+├── config/          # Configuraciones
+└── prisma/          # Modelos y migraciones
+```
 
-## License
+## 📝 API Endpoints
 
-Nest is [MIT licensed](https://github.com/nestjs/nest/blob/master/LICENSE).
+### Estudiantes
+
+- `POST /api/v1/equipo` - Registro de equipo
+- `POST /api/v1/videojuego` - Registro de videojuego
+- `GET /api/v1/inscripciones` - Estado de inscripciones
+
+### Jurados
+
+- `GET /api/v1/evaluaciones` - Lista de proyectos a evaluar
+- `POST /api/v1/evaluaciones` - Enviar evaluación
+- `GET /api/v1/resultados` - Ver resultados
+
+### Admin
+
+- `GET /api/v1/admin/dashboard` - Panel de control
+- `POST /api/v1/admin/jurados` - Gestión de jurados
+- `GET /api/v1/admin/reportes` - Generación de reportes
+
+## 📊 Modelos de Datos
+
+El sistema utiliza los siguientes modelos principales:
+
+- `Usuario` - Información base de usuarios
+- `Estudiante` - Perfil de estudiante
+- `Equipo` - Grupos de desarrollo
+- `Videojuego` - Proyectos registrados
+- `Jurado` - Evaluadores
+- `Evaluacion` - Calificaciones realizadas
+
+Ver el schema completo en [prisma/schema.prisma](prisma/schema.prisma)

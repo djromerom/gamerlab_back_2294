@@ -3,7 +3,7 @@ import { CreateEquipoDto } from './dto/create-equipo.dto';
 import { UpdateEquipoDto } from './dto/update-equipo.dto';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { ValidationExitsService } from 'src/common/services/validation-exits.service';
-import { Prisma } from '@prisma/client';
+import { Prisma, Estado } from '@prisma/client';
 
 @Injectable()
 export class EquipoService {
@@ -98,17 +98,27 @@ export class EquipoService {
   }
 
   async findOne(id: number) {
-    const equipo = await this.prisma.equipo.findUnique({
-      where: {
-        id: id,
-        deleted: false,
+  const equipo = await this.prisma.equipo.findUnique({
+    where: {
+      id: id,
+      deleted: false,
+    },
+    include: {
+      estudiantes: {
+        where: { deleted: false },
+        include: {
+          usuario: true
+        }
       },
-    });
+      videojuegos: {
+        where: { deleted: false }
+      }
+    }
+  });
 
-    this.exits.validateExists('equipo', equipo);
-
-    return equipo;
-  }
+  this.exits.validateExists('equipo', equipo);
+  return equipo;
+}
 
   async update(id: number, updateEquipoDto: UpdateEquipoDto) {
     const equipo = await this.prisma.equipo.findUnique({
@@ -126,6 +136,25 @@ export class EquipoService {
         deleted: false,
       },
       data: updateEquipoDto,
+      include: {
+        estudiantes: {
+          where: { deleted: false },
+          include: {
+            usuario: true,
+            estudianteNrcs: {
+              where: { deleted: false },
+              include: {
+                nrc: {
+                  include: { materia: true },
+                },
+              },
+            },
+          },
+        },
+        videojuegos: {
+          where: { deleted: false },
+        },
+      }
     });
   }
 
@@ -151,7 +180,7 @@ export class EquipoService {
       },
     });
 
-    this.prisma.estudiante.updateMany({
+    await this.prisma.estudiante.updateMany({
       where: {
         equipo_id: id,
         deleted: false,
@@ -161,11 +190,52 @@ export class EquipoService {
       },
     });
 
-    return this.prisma.equipo.update({
+    await this.prisma.equipo.update({
       where: { id },
       data: {
         deleted: true,
       },
     });
+  }
+
+  async updateEstado(idequipo: number, estado: Estado) {
+    const equipo = await this.prisma.equipo.findUnique({
+      where: {
+        id: idequipo,
+        deleted: false,
+      },
+    });
+
+    this.exits.validateExists('equipo', equipo);
+
+    return this.prisma.equipo.update({
+      where: { id: idequipo },
+      data: { estado },
+      include: {
+        estudiantes: true,
+        videojuegos: true,
+      },
+    });
+  }
+
+  //funcion que valida si todos los estudiantes de un equipo están confirmados
+  async allEstudiantesConfirmados(idEquipo: number): Promise<boolean> {
+    const equipo = await this.prisma.equipo.findUnique({
+      where: {
+        id: idEquipo,
+        deleted: false,
+      },
+      include: {
+        estudiantes: {
+          where: { deleted: false },
+        },
+      },
+    });
+
+    if (!equipo) {
+      throw new HttpException('Equipo no encontrado', HttpStatus.NOT_FOUND);
+    }
+
+    return equipo.estudiantes.every((estudiante) => estudiante.confirmado);
   }
 }
