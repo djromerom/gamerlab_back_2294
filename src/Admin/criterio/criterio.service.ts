@@ -21,7 +21,7 @@ export class CriterioService {
 
   async getCriterioById(id_criterio: number) {
     const criterio = await this.prisma.criterio.findUnique({
-      where: { id_criterio },
+      where: { id: id_criterio },
     });
 
     if (!criterio || criterio.deleted) {
@@ -37,7 +37,7 @@ export class CriterioService {
     await this.validarCriterioActivo(id_criterio);
 
     return this.prisma.criterio.update({
-      where: { id_criterio },
+      where: { id: id_criterio },
       data,
     });
   }
@@ -46,14 +46,14 @@ export class CriterioService {
     await this.validarCriterioActivo(id_criterio);
 
     return this.prisma.criterio.update({
-      where: { id_criterio },
+      where: { id: id_criterio },
       data: { deleted: true },
     });
   }
 
   private async validarCriterioActivo(id_criterio: number) {
     const criterio = await this.prisma.criterio.findUnique({
-      where: { id_criterio },
+      where: { id: id_criterio },
     });
 
     if (!criterio || criterio.deleted) {

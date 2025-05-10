@@ -1,6 +1,5 @@
 generator client {
   provider = "prisma-client-js"
-  output   = "../generated/prisma"
 }
 
 datasource db {
@@ -47,21 +46,6 @@ model EstudianteNRC {
   nrc           NRC        @relation(fields: [id_nrc], references: [codigo_nrc])
 
   @@id([id_nrc, id_estudiante])
-}
-
-model Evaluacion {
-  id            Int        @id @default(autoincrement())
-  jurado_id     Int
-  videojuego_id Int
-  comentarios   String
-  create_at     DateTime   @default(now())
-  update_at     DateTime   @default(now())
-  deleted       Boolean    @default(false)
-  Jurado        Jurado     @relation(fields: [jurado_id], references: [id])
-  Videojuego    Videojuego @relation(fields: [videojuego_id], references: [id])
-  Rubrica       Rubrica[]
-
-  @@unique([jurado_id, videojuego_id])
 }
 
 model Jurado {

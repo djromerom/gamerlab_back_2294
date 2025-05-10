@@ -8,7 +8,7 @@ import {
   Put,
 } from '@nestjs/common';
 import { AdminNrcService } from './adminNrc.service';
-import { CreateNrcDto } from './create-nrc.dto';
+import { CreateNrcDto } from './dto/create-nrc.dto';
 
 
 @Controller('admin')

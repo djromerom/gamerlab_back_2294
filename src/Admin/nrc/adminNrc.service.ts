@@ -23,15 +23,15 @@ export class AdminNrcService {
         deleted: false,
       },
       include: {
-        Materia: true,
-        Usuario: true,
+        materia: true,
+        profesor: true
       },
     });
 
     return nrcs.map((nrc) => ({
       codigo_nrc: nrc.codigo_nrc,
-      materia: nrc.Materia.nombre,
-      profesor: nrc.Usuario.nombre_completo,
+      materia: nrc.materia.nombre,
+      profesor: nrc.profesor.nombre_completo,
       create_at: nrc.create_at,
       update_at: nrc.update_at,
     }));
@@ -42,8 +42,8 @@ export class AdminNrcService {
     const nrc = await this.prisma.nRC.findUnique({
       where: { codigo_nrc },
       include: {
-        Materia: true,
-        Usuario: true,
+        materia: true,
+        profesor: true,
       },
     });
 
@@ -53,8 +53,8 @@ export class AdminNrcService {
 
     return {
       codigo_nrc: nrc.codigo_nrc,
-      materia: nrc.Materia.nombre,
-      profesor: nrc.Usuario.nombre_completo,
+      materia: nrc.materia.nombre,
+      profesor: nrc.profesor.nombre_completo,
       create_at: nrc.create_at,
       update_at: nrc.update_at,
     };
@@ -68,13 +68,13 @@ export class AdminNrcService {
         deleted: false,
       },
       include: {
-        Usuario: true,
+        profesor: true,
       },
     });
 
     return nrcs.map((nrc) => ({
       codigo_nrc: nrc.codigo_nrc,
-      profesor: nrc.Usuario.nombre_completo,
+      profesor: nrc.profesor.nombre_completo,
       create_at: nrc.create_at,
       update_at: nrc.update_at,
     }));
