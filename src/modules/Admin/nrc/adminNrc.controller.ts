@@ -10,7 +10,6 @@ import {
 import { AdminNrcService } from './adminNrc.service';
 import { CreateNrcDto } from './dto/create-nrc.dto';
 
-
 @Controller('admin')
 export class AdminNrcController {
   constructor(private adminService: AdminNrcService) {}

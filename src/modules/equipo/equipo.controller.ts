@@ -9,7 +9,9 @@ import { EstudianteService } from '../estudiante/estudiante.service';
 import { CreateEstudianteDto } from '../estudiante/dto/create-estudiante.dto';
 import { ConfirmEstudianteDto } from '../estudiante/dto/confirm-estudiante.dto';
 import { Estado } from '@prisma/client';
+import { Public } from 'src/auth/guards/auth.guard';
 
+@Public()
 @Controller('equipo')
 @UseInterceptors(ClassSerializerInterceptor)
 export class EquipoController {

@@ -6,9 +6,9 @@ import { ConfigModule } from '@nestjs/config';
 import { JuradoModule } from './modules/jurado/jurado.module';
 import { EvaluacionModule } from './modules/evaluacion/evaluacion.module'
 import { ReportsModule } from './modules/reports/reports.module';
-import { CriterioModule } from './Admin/criterio/criterio.module';
-import { AdminNrcModule } from './Admin/nrc/adminNrc.module';
-import { MateriaModule } from './Admin/materia/materia.module';
+import { CriterioModule } from './modules/Admin/criterio/criterio.module';
+import { AdminNrcModule } from './modules/Admin/nrc/adminNrc.module';
+import { MateriaModule } from './modules/Admin/materia/materia.module';
 import { AuthModule } from './auth/auth.module';
 import { UsersModule } from './users/users.module';
 
