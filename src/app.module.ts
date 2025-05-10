@@ -5,11 +5,10 @@ import { ConfigModule } from '@nestjs/config';
 import { EstudianteModule } from './modules/estudiante/estudiante.module';
 import { MateriaModule } from './modules/materia/materia.module';
 import { NrcModule } from './modules/nrc/nrc.module';
-// import { StorageModule } from './modules/storage/storage.module'; // Keep this commented if you're having issues with Supabase
+// import { StorageModule } from './modules/storage/storage.module'
 import { JuradoModule } from './modules/jurado/jurado.module';
+import { EvaluacionModule } from './modules/evaluacion/evaluacion.module'
 import { ReportsModule } from './modules/reports/reports.module';
-
-
 
 @Module({
   imports: [
@@ -17,8 +16,9 @@ import { ReportsModule } from './modules/reports/reports.module';
       isGlobal: true,
       envFilePath: '.env',
     }),
-    EquipoModule,
-    VideojuegoModule,
+    EvaluacionModule,
+    EquipoModule, 
+    VideojuegoModule, 
     EstudianteModule,
     MateriaModule, 
     NrcModule,
