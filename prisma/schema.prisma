@@ -109,7 +109,7 @@ model Materia {
 }
 
 model NRC {
-  codigo_nrc     Int             @id @default(autoincrement())
+  codigo_nrc     Int             @id 
   materia_id     Int
   profesor_id    Int
   create_at      DateTime        @default(now())
