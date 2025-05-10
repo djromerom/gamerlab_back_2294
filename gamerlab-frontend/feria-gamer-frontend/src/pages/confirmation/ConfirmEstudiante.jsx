@@ -30,16 +30,24 @@ const ConfirmEstudiante = () => {
             }
 
             try {
-                // En lugar de confirmar, solo obtenemos información del estudiante
                 const response = await fetch(`http://localhost:3000/api/v1/equipo/estudiante-by-token?token=${token}`);
-                
+
                 if (!response.ok) {
                     throw new Error(`Error ${response.status}: ${response.statusText}`);
                 }
-                
+
                 const data = await response.json();
                 setSuccess(true);
                 setStudentInfo(data);
+
+                // Invalidar el token una vez que tenemos los datos
+                await fetch('http://localhost:3000/api/v1/estudiante/invalidar-token', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ token }),
+                });
             } catch (err) {
                 setError('Error al obtener información: ' + (err.message));
             } finally {
@@ -50,7 +58,7 @@ const ConfirmEstudiante = () => {
         fetchStudentInfo();
     }, [token, errorParam]);
 
-    
+
 
 
 
