@@ -20,12 +20,18 @@ export class UsuariosService {
   async getUsuarios() {
     return this.prismaService.usuario.findMany({
       where: { deleted: false },
+      include: {
+        nrcs: true
+      },
     });
   }
 
   async getUsuarioById(id: number) {
     const usuario = await this.prismaService.usuario.findUnique({
       where: { id, deleted: false },
+      include: {
+        nrcs: true,
+      },
     });
 
     if (!usuario) {
@@ -41,6 +47,9 @@ export class UsuariosService {
     return this.prismaService.usuario.update({
       where: { id },
       data,
+      include: {
+        nrcs: true,
+      },
     });
   }
 
@@ -70,7 +79,20 @@ export class UsuariosService {
     const usuario = await this.prismaService.usuario.findUnique({
       where: { id: id_user },
       include: {
-        roles: true
+        roles: true,
+        nrcs: {
+          include: {
+            estudianteNrcs: {
+              include: {
+                estudiante: {
+                  include: {
+                    equipo: true,
+                  },
+                },
+              },
+            },
+          }
+        }
       },
     });
 
@@ -93,23 +115,7 @@ export class UsuariosService {
     }
 
     // obtener los estudiantes del usuario
-    const nrcs = await this.prismaService.nRC.findMany({
-      where: {
-        profesor_id: id_user,
-        deleted: false,
-      },
-      include: {
-        estudianteNrcs: {
-          include: {
-            estudiante: {
-              include: {
-                equipo: true
-              }
-            }
-          },
-        }
-      }
-    });
+    const nrcs = usuario.nrcs.filter((nrc) => !nrc.deleted);
     
     // obtener todos los equipos de los estudiantes
     const equipos = nrcs.flatMap((nrc) =>

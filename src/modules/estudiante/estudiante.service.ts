@@ -6,6 +6,7 @@ import { UpdateEstudianteDto } from './dto/update-estudiante.dto';
 import { EstudianteEntity } from './entities/estudiante.entity';
 import { EmailService } from 'src/modules/email/email.service';
 import { GenerateTokenService } from 'src/common/services/generateToken.service';
+import { PasswordService } from 'src/common/services/password.service';
 
 @Injectable()
 export class EstudianteService {
@@ -13,7 +14,8 @@ export class EstudianteService {
     private readonly prisma: PrismaService,
     private readonly exits: ValidationExitsService,
     private readonly emailService: EmailService,
-    private readonly generateTokenService: GenerateTokenService
+    private readonly generateTokenService: GenerateTokenService,
+    private readonly passwordService: PasswordService,
   ) { }
 
   async create(id_equipo: number, createEstudianteDto: CreateEstudianteDto) {
@@ -30,7 +32,7 @@ export class EstudianteService {
         data: {
           nombre_completo: createEstudianteDto.nombre_completo,
           email: createEstudianteDto.email,
-          hash_contrasena: '1234567',
+          hash_contrasena: await this.passwordService.hashPassword('123456'), // Contraseña por defecto
         },
       });
     }
