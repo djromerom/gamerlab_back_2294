@@ -1,18 +1,18 @@
 import { Body, Controller, Get, HttpCode, HttpStatus, Post, UseGuards } from '@nestjs/common';
 import { AuthService } from './auth.service';
-import { AuthGuard } from './guards/auth.guard';
+import { AuthGuard, Public } from './guards/auth.guard';
 
 interface UserDTO {
   nombre_completo: string;
   email: string;
   password: string;
 }
-
+@Public()
 @Controller('auth')
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
-  @UseGuards(AuthGuard)
+  
   @Get('users')
   getUsers() {
     return this.authService.getUsers();

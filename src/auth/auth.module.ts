@@ -14,7 +14,7 @@ imports: [PrismaModule,
   signOptions: { expiresIn: '60s' },
 })],
   controllers: [AuthController],
-  providers: [AuthService, AuthGuard],
+  providers: [AuthService, {provide: 'APP_GUARD', useClass: AuthGuard}],
 
 })
 export class AuthModule {}
