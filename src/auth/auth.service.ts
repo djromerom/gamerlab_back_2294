@@ -20,7 +20,7 @@ export class AuthService {
   async signUp(nombre_completo: string, email: string, password: string) {
     try {
       const userFound = await this.prismaService.usuario.findUnique({
-        where: { email },
+        where: { email, deleted: false },
       });
 
       if (userFound) throw new BadRequestException('El usuario ya existe');
