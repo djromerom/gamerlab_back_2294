@@ -10,6 +10,7 @@ import { JuradoModule } from './modules/jurado/jurado.module';
 import { ReportsModule } from './modules/reports/reports.module';
 
 
+
 @Module({
   imports: [
     ConfigModule.forRoot({
