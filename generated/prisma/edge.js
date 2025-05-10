@@ -298,7 +298,7 @@ const config = {
       "value": "prisma-client-js"
     },
     "output": {
-      "value": "C:\\Users\\Ariza\\Downloads\\Ds\\project-diseño\\generated\\prisma",
+      "value": "C:\\Users\\Ariza\\OneDrive\\Documentos\\GitHub\\v2\\the-fallen-king\\gamerlab_back_2294\\generated\\prisma",
       "fromEnvVar": null
     },
     "config": {
@@ -312,7 +312,7 @@ const config = {
       }
     ],
     "previewFeatures": [],
-    "sourceFilePath": "C:\\Users\\Ariza\\Downloads\\Ds\\project-diseño\\prisma\\schema.prisma",
+    "sourceFilePath": "C:\\Users\\Ariza\\OneDrive\\Documentos\\GitHub\\v2\\the-fallen-king\\gamerlab_back_2294\\prisma\\schema.prisma",
     "isCustomOutput": true
   },
   "relativeEnvPaths": {
