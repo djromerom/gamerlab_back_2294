@@ -1,30 +1,31 @@
 import { Module } from '@nestjs/common';
-import { AppController } from './app.controller';
-import { AppService } from './app.service';
-import { AuthModule } from './auth/auth.module';
-import { ConfigModule, ConfigService } from '@nestjs/config';
-import { JwtModule } from '@nestjs/jwt';
-import { UsersController } from './users/users.controller';
-import { UsersModule } from './users/users.module';
+import { EquipoModule } from './modules/equipo/equipo.module';
+import { VideojuegoModule } from './modules/videojuego/videojuego.module';
+import { ConfigModule } from '@nestjs/config';
+import { EstudianteModule } from './modules/estudiante/estudiante.module';
+import { MateriaModule } from './modules/materia/materia.module';
+import { NrcModule } from './modules/nrc/nrc.module';
+// import { StorageModule } from './modules/storage/storage.module'; // Keep this commented if you're having issues with Supabase
+import { JuradoModule } from './modules/jurado/jurado.module';
+import { ReportsModule } from './modules/reports/reports.module';
+
+
 
 @Module({
   imports: [
     ConfigModule.forRoot({
-      isGlobal: true, // para que ConfigService esté disponible en toda la app sin tener que importarlo cada vez
+      isGlobal: true,
+      envFilePath: '.env',
     }),
-    JwtModule.registerAsync({
-      imports: [ConfigModule],
-      inject: [ConfigService],
-      useFactory: async (configService: ConfigService) => ({
-        secret: configService.get('SECRET'),
-        signOptions: { expiresIn: '1h' },
-      }),
-    }),
-    AuthModule,
-    UsersModule,
+    EquipoModule,
+    VideojuegoModule,
+    EstudianteModule,
+    MateriaModule, 
+    NrcModule,
+    // StorageModule, // Keep this commented if you're having issues with Supabase
+    JuradoModule,
+    ReportsModule,
   ],
-  controllers: [AppController],
-  providers: [AppService],
+  providers: [], 
 })
 export class AppModule {}
-
