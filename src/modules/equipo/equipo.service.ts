@@ -130,6 +130,10 @@ export class EquipoService {
 
     this.exits.validateExists('equipo', equipo);
 
+    if (equipo?.estado === Estado.Inscripcion_completa) {
+      throw new HttpException('No se puede modificar el equipo porque la inscripción está completa', HttpStatus.BAD_REQUEST);
+    }
+
     return this.prisma.equipo.update({
       where: {
         id: id,

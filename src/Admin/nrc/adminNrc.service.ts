@@ -1,15 +1,46 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
+import { CreateNrcDto } from './dto/create-nrc.dto';
 
 @Injectable()
 export class AdminNrcService {
   constructor(private prisma: PrismaService) {}
 
   // Crear NRC
-  async createNrc(data: { materia_id: number; profesor_id: number }) {
+  async createNrc(data: CreateNrcDto) {
+    // Validar que el NRC no exista
+    const existingNrc = await this.prisma.nRC.findUnique({
+      where: {
+        codigo_nrc: data.codigo_nrc,
+        deleted: false,
+      },
+    });
+
+    if (existingNrc) {
+      throw new NotFoundException(`NRC con id ${data.codigo_nrc} ya existe`);
+    }
+
+    // Validar que la materia y el profesor existan
+    const materia = await this.prisma.materia.findUnique({
+      where: { id: data.materia_id },
+    });
+
+    const profesor = await this.prisma.usuario.findUnique({
+      where: { id: data.profesor_id },
+    });
+
+    if (!materia) {
+      throw new NotFoundException(`Materia con id ${data.materia_id} no encontrada`);
+    }
+
+    if (!profesor) {
+      throw new NotFoundException(`Profesor con id ${data.profesor_id} no encontrado`);
+    }
+
     console.log('DATA RECIBIDA:', data);
     return this.prisma.nRC.create({
       data: {
+        codigo_nrc: data.codigo_nrc,
         materia_id: data.materia_id,
         profesor_id: data.profesor_id,
       },
@@ -32,8 +63,6 @@ export class AdminNrcService {
       codigo_nrc: nrc.codigo_nrc,
       materia: nrc.materia.nombre,
       profesor: nrc.profesor.nombre_completo,
-      create_at: nrc.create_at,
-      update_at: nrc.update_at,
     }));
   }
 
@@ -55,8 +84,6 @@ export class AdminNrcService {
       codigo_nrc: nrc.codigo_nrc,
       materia: nrc.materia.nombre,
       profesor: nrc.profesor.nombre_completo,
-      create_at: nrc.create_at,
-      update_at: nrc.update_at,
     };
   }
 
@@ -75,8 +102,6 @@ export class AdminNrcService {
     return nrcs.map((nrc) => ({
       codigo_nrc: nrc.codigo_nrc,
       profesor: nrc.profesor.nombre_completo,
-      create_at: nrc.create_at,
-      update_at: nrc.update_at,
     }));
   }
 
