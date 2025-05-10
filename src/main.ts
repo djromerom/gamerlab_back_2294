@@ -13,7 +13,7 @@ async function bootstrap() {
     whitelist: true,
     forbidNonWhitelisted: true,
   }));
-  // In main.ts
+ 
   app.enableCors({
     origin: 'http://localhost:3001', // Or the URL where your React app is running
     methods: ['GET', 'POST', 'PATCH', 'DELETE', 'OPTIONS'],
