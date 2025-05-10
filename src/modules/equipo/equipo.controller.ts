@@ -7,7 +7,6 @@ import { EquipoEntity } from './entities/equipo.entity';
 import { EstudianteEntity } from '../estudiante/entities/estudiante.entity';
 import { EstudianteService } from '../estudiante/estudiante.service';
 import { CreateEstudianteDto } from '../estudiante/dto/create-estudiante.dto';
-import { ConfirmEstudianteDto } from '../estudiante/dto/confirm-estudiante.dto';
 import { Estado } from '@prisma/client';
 import { Res } from '@nestjs/common';
 import { Response } from 'express';
@@ -54,6 +53,7 @@ export class EquipoController {
     @Query('token') token: string,
     @Res() response: Response
   ) {
+    const FRONTEND = process.env.FRONTEND_URL || 'http://localhost:3001';
     try {
       const estudiante = await this.estudianteService.confirmarEstudiante(token);
 
@@ -69,10 +69,10 @@ export class EquipoController {
       }
 
       // Redirigir al frontend con el token como parámetro
-      return response.redirect(302, `http://localhost:3001/confirmar-registro?token=${token}`);
+      return response.redirect(302, `${FRONTEND}/confirmar-registro?token=${token}`);
     } catch (error) {
       // Redirigir a una página de error
-      return response.redirect(302, `http://localhost:3001/confirmar-registro?error=${encodeURIComponent(error.message)}`);
+      return response.redirect(302, `${FRONTEND}/confirmar-registro?error=${encodeURIComponent(error.message)}`);
     }
   }
 
