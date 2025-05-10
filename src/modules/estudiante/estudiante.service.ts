@@ -179,14 +179,12 @@ export class EstudianteService {
     });
 
     if (!estudiante) {
-      console.log('Token no encontrado:', token);
-      throw new HttpException('Token de confirmación no válido este', HttpStatus.NOT_FOUND);
-    }
+    throw new HttpException('Token de confirmación no válido', HttpStatus.NOT_FOUND);
+  }
 
-    if (estudiante.confirmado) {
-      throw new HttpException('El estudiante ya está confirmado', HttpStatus.BAD_REQUEST);
-    }
-    
+  if (estudiante.confirmado) {
+    throw new HttpException('El estudiante ya está confirmado', HttpStatus.BAD_REQUEST);
+  }
     
 
     // Actualizar estado de confirmación
@@ -196,7 +194,7 @@ export class EstudianteService {
       },
       data: {
         confirmado: true,
-        token_confirmacion: null, // Borramos el token una vez usado
+        //token_confirmacion: null, // Borramos el token una vez usado
       },
       select: {
         id: true,
@@ -220,4 +218,31 @@ export class EstudianteService {
 
     return estudianteActualizado;
   }
+  // Añadir este método a EstudianteService
+
+async invalidarToken(token: string) {
+  const estudiante = await this.prisma.estudiante.findFirst({
+    where: {
+      token_confirmacion: token,
+      deleted: false,
+    },
+  });
+
+  if (!estudiante) {
+    throw new HttpException('Estudiante no encontrado', HttpStatus.NOT_FOUND);
+  }
+
+  await this.prisma.estudiante.update({
+    where: {
+      id: estudiante.id,
+    },
+    data: {
+      token_confirmacion: null, // Borramos el token una vez usado
+    },
+  });
+
+  return { message: 'Token invalidado exitosamente' };
+}
+
+
 }
