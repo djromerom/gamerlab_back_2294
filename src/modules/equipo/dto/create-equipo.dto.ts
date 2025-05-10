@@ -1,6 +1,6 @@
 import { ApiProperty } from "@nestjs/swagger";
 import { IsString, IsOptional, IsNotEmpty } from "class-validator";
-import { Estado } from "@prisma/client";
+import { Estado } from '@prisma/client';
 
 export class CreateEquipoDto {
   
