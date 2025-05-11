@@ -3,6 +3,7 @@ import { ConfigService } from '@nestjs/config';
 import * as nodemailer from 'nodemailer';
 import { CreateEmailDto } from './dto/email.dto';
 import { CreateEmailJuradoDto } from './dto/email-jurado.dto';
+import { CreateEmailProfesorDto } from './dto/email-profesor.dto';
 
 @Injectable()
 export class EmailService {
@@ -28,7 +29,7 @@ export class EmailService {
       const currentToken = token[i];
       console.log('Sending email to:', email, 'with token:', currentToken);
 
-      const confirmationUrl = `${this.configService.get('APP_URL')}/api/v1/equipo/confirmar?token=${currentToken}`;
+      const confirmationUrl = `${this.configService.get('FRONTEND_URL')}/jurados?activate==${currentToken}`;
       try {
         await this.transporter.sendMail({
           from: this.configService.get('MAIL_FROM'),
@@ -229,6 +230,63 @@ export class EmailService {
                 </p>
               </div>
 
+              <div style="text-align: center; padding-top: 20px; border-top: 1px solid #eeeeee; margin-top: 20px;">
+                <p style="color: #666; font-size: 12px;">
+                  Este es un correo automático. Por favor, no respondas directamente a este mensaje.
+                </p>
+              </div>
+            </div>
+          </body>
+        </html>
+      `
+    });
+  }
+
+  async sendEmailProfesor({email, token} : CreateEmailProfesorDto) {
+
+    const confirmUrl = `${this.configService.get('FRONTEND_URL')}/profesores?activate=${token}`;
+    console.log('Sending email to:', email, 'with token:', token);
+    this.transporter.sendMail({
+      from: this.configService.get('MAIL_FROM'),
+      to: email,
+      subject: 'Bienvenido a GameLab - Confirmación de Profesor',
+      html: `
+        <!DOCTYPE html>
+        <html>
+          <body style="margin: 0; padding: 0; font-family: Arial, sans-serif; background-color: #f4f4f4;">
+            <div style="max-width: 600px; margin: 0 auto; background-color: #ffffff; padding: 20px; border-radius: 10px; box-shadow: 0 0 10px rgba(0,0,0,0.1);">
+              <div style="text-align: center; padding: 20px;">
+                <img src="${this.configService.get('APP_LOGO_URL', 'https://tulogo.png')}" alt="GameLab Logo" style="max-width: 150px;">
+              </div>
+              
+              <div style="padding: 20px; color: #333333;">
+                <h1 style="color: #2C3E50; text-align: center;">¡Bienvenido a GameLab!</h1>
+                
+                <p style="font-size: 16px; line-height: 1.6;">
+                  Has sido seleccionado como profesor para revisar los proyectos de videojuegos en nuestra plataforma. Tu experiencia y conocimiento serán fundamentales para valorar el trabajo de nuestros estudiantes.
+                </p>
+
+                <div style="background-color: #f8f9fa; border-left: 4px solid #2C3E50; padding: 15px; margin: 20px 0;">
+                  <p style="margin: 0; color: #666;">
+                    Como profesor podrás:
+                    <ul style="color: #666;">
+                      <li>Revisar proyectos de videojuegos</li>
+                      <li>Proporcionar retroalimentación valiosa</li>
+                      <li>Contribuir al desarrollo de futuros talentos</li>
+                    </ul>
+                  </p>
+                </div>
+
+                <div style="text-align: center; margin: 30px 0;">
+                  <a href="${confirmUrl}" 
+                     style="background-color: #2C3E50; color: white; padding: 12px 30px; text-decoration: none; border-radius: 5px; font-weight: bold;">
+                    Aceptar Invitación
+                  </a>
+                </div>
+                <p style="font-size: 14px; color: #666; text-align: center; margin-top: 30px;">
+                  Si tienes alguna pregunta, no dudes en contactarnos respondiendo este correo.
+                </p>
+              </div>
               <div style="text-align: center; padding-top: 20px; border-top: 1px solid #eeeeee; margin-top: 20px;">
                 <p style="color: #666; font-size: 12px;">
                   Este es un correo automático. Por favor, no respondas directamente a este mensaje.

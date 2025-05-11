@@ -16,6 +16,7 @@ model Usuario {
   create_at       DateTime     @default(now())
   update_at       DateTime     @default(now()) @updatedAt
   deleted         Boolean      @default(false)
+  token_confirmacion String?
   estudiante      Estudiante?
   jurado          Jurado?
   nrcs            NRC[]        @relation("ProfesorNRC")
