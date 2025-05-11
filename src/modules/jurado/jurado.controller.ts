@@ -174,4 +174,20 @@ export class JuradoController {
     remove(@Param('id', ParseIntPipe) id: number) {
         return this.juradoService.remove(id);
     }
+
+    @Get(':id/videojuegos-asignados')
+    @ApiOkResponse({
+        type: JuradoEntity,
+        description: 'Lista de videojuegos asignados obtenida exitosamente.'
+    })
+    @ApiNotFoundResponse({
+        description: 'Jurado no encontrado.'
+    })
+    @ApiResponse({
+        status: HttpStatus.UNAUTHORIZED,
+        description: 'Acción no autorizada.'
+    })
+    getVideojuegosAsignados(@Param('id', ParseIntPipe) id: number) {
+        return this.juradoService.getVideojuegosAsignados(id);
+    }
 }

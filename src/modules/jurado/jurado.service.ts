@@ -352,4 +352,29 @@ export class JuradoService {
 
     return this.findOne(id);
   }
+
+  async getVideojuegosAsignados(id: number) {
+    const jurado = await this.prisma.jurado.findFirst({
+      where: {
+        id,
+        deleted: false
+      },
+      include: {
+        asignaciones: {
+          where: {
+            deleted: false
+          },
+          include: {
+            videojuego: true
+          }
+        }
+      }
+    });
+
+    if (!jurado) {
+      throw new HttpException('Jurado no encontrado', HttpStatus.NOT_FOUND);
+    }
+
+    return jurado.asignaciones;
+  }
 }
