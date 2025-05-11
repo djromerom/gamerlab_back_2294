@@ -11,10 +11,8 @@ import { Estado } from '@prisma/client';
 import { Res } from '@nestjs/common';
 import { Response } from 'express';
 import { PrismaService } from '../../prisma/prisma.service';
-import { Public } from 'src/auth/guards/auth.guard';
 
 
-@Public()
 @Controller('equipo')
 @UseInterceptors(ClassSerializerInterceptor)
 export class EquipoController {
