@@ -122,7 +122,15 @@ export class EquipoService {
       estudiantes: {
         where: { deleted: false },
         include: {
-          usuario: true
+          usuario: true,
+          estudianteNrcs: {
+            where: { deleted: false },
+            include: {
+              nrc: {
+                include: { materia: true },
+              },
+            },
+          },
         }
       },
       videojuegos: {

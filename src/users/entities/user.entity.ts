@@ -16,10 +16,10 @@ export class UsuarioEntity {
   hash_contrasena: string;
 
   @ApiProperty()
-  created_at: Date;
+  create_at: Date;
 
   @ApiProperty()
-  updated_at: Date;
+  update_at: Date;
 
   @Exclude()
   deleted: boolean;
@@ -33,6 +33,9 @@ export class UsuarioEntity {
   @ValidateNested({ each: true })
   @Expose()
   NRCs?: any[];
+
+  @Exclude()
+  token_confirmacion: string | null;
 
   constructor(partial: Partial<UsuarioEntity>) {
     Object.assign(this, partial);

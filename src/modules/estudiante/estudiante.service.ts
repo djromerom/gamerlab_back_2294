@@ -54,6 +54,20 @@ export class EstudianteService {
       throw new HttpException('El estudiante ya existe', HttpStatus.BAD_REQUEST);
     }
 
+    // verificar los NRCs
+    const nrcs = await this.prisma.nRC.findMany({
+      where: {
+        codigo_nrc: {
+          in: createEstudianteDto.NRCs,
+        },
+        deleted: false,
+      },
+    });
+
+    if (nrcs.length !== createEstudianteDto.NRCs.length) {
+      throw new HttpException('Uno o más NRCs no existen', HttpStatus.BAD_REQUEST);
+    }
+
     // Generar token para la confirmación por correo
     const confirmationToken = this.generateTokenService.generateToken();
 
@@ -65,6 +79,27 @@ export class EstudianteService {
         id_user: usuario.id,
         github: createEstudianteDto.github,
         token_confirmacion: confirmationToken, // Añadir esta columna en la próxima migración
+        estudianteNrcs: {
+          createMany: {
+            data: createEstudianteDto.NRCs.map(nrc => ({
+              id_nrc: nrc,
+            })),
+          },
+        },
+      },
+      include: {
+        usuario: {
+          select: {
+            nombre_completo: true,
+            email: true,
+          },
+        },
+        equipo: {
+          select: {
+            id: true,
+            nombre_equipo: true,
+          },
+        },
       },
     });
 
@@ -150,6 +185,10 @@ export class EstudianteService {
           },
         },
       },
+      include: {
+        usuario: true,
+        estudianteNrcs: true
+      },
     });
   }
 
@@ -163,7 +202,7 @@ export class EstudianteService {
 
     this.exits.validateExists('estudiante', estudiante);
 
-    return this.prisma.estudiante.update({
+    await this.prisma.estudiante.update({
       where: { id },
       data: {
         deleted: true,
@@ -203,16 +242,13 @@ export class EstudianteService {
         confirmado: true,
         github: true,
         equipo_id: true,
-        usuario: {
-          select: {
-            nombre_completo: true,
-            email: true,
-          },
-        },
-        equipo: {
-          select: {
-            id: true,
-            nombre_equipo: true,
+        usuario: true,
+        estudianteNrcs: {
+          where: { deleted: false },
+          include: {
+            nrc: {
+              include: { materia: true },
+            },
           },
         },
       },
