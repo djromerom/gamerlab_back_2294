@@ -43,4 +43,9 @@ export class AdminNrcController {
   deleteNrc(@Param('id') id: string) {
     return this.adminService.deleteNrc(Number(id));
   }
+
+  @Post('asignar-profesor/:idNrc/:idProfesor')
+  asignarProfesor(@Param('idNrc') idNrc: number, @Param('idProfesor') idProfesor: number) {
+    return this.adminService.asignarProfesor(idNrc, idProfesor);
+  }
 }

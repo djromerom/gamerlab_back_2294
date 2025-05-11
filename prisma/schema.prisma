@@ -112,13 +112,13 @@ model Materia {
 model NRC {
   codigo_nrc     Int             @id 
   materia_id     Int
-  profesor_id    Int
+  profesor_id    Int?
   create_at      DateTime        @default(now())
   update_at      DateTime        @default(now()) @updatedAt
   deleted        Boolean         @default(false)
   estudianteNrcs EstudianteNRC[]
   materia        Materia         @relation(fields: [materia_id], references: [id])
-  profesor       Usuario         @relation("ProfesorNRC", fields: [profesor_id], references: [id])
+  profesor       Usuario?         @relation("ProfesorNRC", fields: [profesor_id], references: [id])
 }
 
 model Evaluacion {

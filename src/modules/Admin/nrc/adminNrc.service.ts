@@ -25,16 +25,17 @@ export class AdminNrcService {
       where: { id: data.materia_id },
     });
 
-    const profesor = await this.prisma.usuario.findUnique({
-      where: { id: data.profesor_id },
-    });
+    if (data.profesor_id) {
+      const profesor = await this.prisma.usuario.findUnique({
+        where: { id: data.profesor_id },
+      });
+      if (!profesor) {
+        throw new NotFoundException(`Profesor con id ${data.profesor_id} no encontrado`);
+      }
+    }
 
     if (!materia) {
       throw new NotFoundException(`Materia con id ${data.materia_id} no encontrada`);
-    }
-
-    if (!profesor) {
-      throw new NotFoundException(`Profesor con id ${data.profesor_id} no encontrado`);
     }
 
     console.log('DATA RECIBIDA:', data);
@@ -42,8 +43,8 @@ export class AdminNrcService {
       data: {
         codigo_nrc: data.codigo_nrc,
         materia_id: data.materia_id,
-        profesor_id: data.profesor_id,
-      },
+        profesor_id: data?.profesor_id,
+      }
     });
   }
 
@@ -62,7 +63,7 @@ export class AdminNrcService {
     return nrcs.map((nrc) => ({
       codigo_nrc: nrc.codigo_nrc,
       materia: nrc.materia.nombre,
-      profesor: nrc.profesor.nombre_completo,
+      profesor: nrc.profesor?.nombre_completo,
     }));
   }
 
@@ -83,7 +84,7 @@ export class AdminNrcService {
     return {
       codigo_nrc: nrc.codigo_nrc,
       materia: nrc.materia.nombre,
-      profesor: nrc.profesor.nombre_completo,
+      profesor: nrc.profesor?.nombre_completo,
     };
   }
 
@@ -101,14 +102,14 @@ export class AdminNrcService {
 
     return nrcs.map((nrc) => ({
       codigo_nrc: nrc.codigo_nrc,
-      profesor: nrc.profesor.nombre_completo,
+      profesor: nrc.profesor?.nombre_completo,
     }));
   }
 
   // Actualizar NRC
   async updateNrc(
     codigo_nrc: number,
-    data: { materia_id?: number; profesor_id?: number },
+    data: Partial<CreateNrcDto>,
   ) {
     await this.validarNrcActivo(codigo_nrc);
 
@@ -139,5 +140,23 @@ export class AdminNrcService {
     }
 
     return nrc;
+  }
+
+  // Asignar profesor a un NRC
+  async asignarProfesor(codigo_nrc: number, profesor_id: number) {
+    await this.validarNrcActivo(codigo_nrc);
+
+    const profesor = await this.prisma.usuario.findUnique({
+      where: { id: profesor_id },
+    });
+
+    if (!profesor) {
+      throw new NotFoundException(`Profesor con id ${profesor_id} no encontrado`);
+    }
+
+    return this.prisma.nRC.update({
+      where: { codigo_nrc },
+      data: { profesor_id },
+    });
   }
 }
