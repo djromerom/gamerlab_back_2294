@@ -7,12 +7,14 @@ import {
   Param,
   Post,
   Put,
+  Query,
   SerializeOptions,
   UseInterceptors,
 } from '@nestjs/common';
 import { UsuariosService } from './users.service'; // Asegúrate de esta ruta sea correcta
 import { UsuarioDTO } from './dto/usuario.dto';
 import { UsuarioEntity } from './entities/user.entity';
+import { ApiResponse } from '@nestjs/swagger';
 
 @Controller('usuarios')
 @UseInterceptors(ClassSerializerInterceptor)
@@ -26,8 +28,8 @@ export class UsuariosController {
 
   @SerializeOptions({ type: UsuarioEntity })
   @Get('getUsuarios')
-  getUsuarios() {
-    return this.usuariosService.getUsuarios();
+  getUsuarios(@Query('limit') limit: number, @Query('offset') offset: number) {
+    return this.usuariosService.getUsuarios(limit, offset);
   }
 
   @SerializeOptions({ type: UsuarioEntity })
@@ -51,5 +53,12 @@ export class UsuariosController {
   @Get('me/:id/equipos')
   getEquiposByUsuario(@Param('id') id: number) {
     return this.usuariosService.getEquiposbyNRC(id);
+  }
+
+  @SerializeOptions({ type: UsuarioEntity })
+  @ApiResponse({isArray: true, type: UsuarioEntity, description: 'Lista de profesores'})
+  @Get('get-profesores')
+  getProfesores(@Query('limit') limit: number, @Query('offset') offset: number) {
+    return this.usuariosService.getProfesores(limit, offset);
   }
 }

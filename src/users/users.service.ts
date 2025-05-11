@@ -17,12 +17,14 @@ export class UsuariosService {
     });
   }
 
-  async getUsuarios() {
+  async getUsuarios(limit: number, offset: number) {
     return this.prismaService.usuario.findMany({
       where: { deleted: false },
       include: {
         nrcs: true
       },
+      take: limit,
+      skip: offset,
     });
   }
 
@@ -138,6 +140,37 @@ export class UsuariosService {
       id_equipo: equipo.equipo.id,
       nombre_equipo: equipo.equipo.nombre_equipo,
       codigo_nrc: equipo.codigo_nrc,
+    }));
+  }
+
+  async getProfesores(limit: number, offset: number) {
+    const usuarios = await this.prismaService.usuario.findMany({
+      where: {
+        deleted: false,
+        roles: {
+          some: {
+            rol: {
+              nombre: 'PROFESOR',
+              deleted: false,
+            }
+          },
+        },
+      },
+      include: {
+        nrcs: true,
+      },
+      take: limit,
+      skip: offset,
+    });
+
+    return usuarios.map((usuario) => ({
+      id: usuario.id,
+      nombre_completo: usuario.nombre_completo,
+      email: usuario.email,
+      nrcs: usuario.nrcs.map((nrc) => ({
+        codigo_nrc: nrc.codigo_nrc,
+        materia_id: nrc.materia_id,
+      })),
     }));
   }
   
