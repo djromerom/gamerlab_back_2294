@@ -1,19 +1,14 @@
-import { Body, Controller, Get, HttpCode, HttpStatus, Post } from '@nestjs/common';
+import { Body, Controller, HttpCode, HttpStatus, Post } from '@nestjs/common';
 import { AuthService } from './auth.service';
-import { Public } from './guards/auth.guard';
+import { Public } from './decorators/public.decorator';
 import { LoginUserDto } from './dto/LoginUser.dto';
+import { CreateUserDto } from './dto/createUser.dto';
+import { ActivateDto } from './dto/activate.dto';
 
-@Public()
 @Controller('auth')
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
-  
-  @Get('users')
-  getUsers() {
-    return this.authService.getUsers();
-
-  }
   @HttpCode(HttpStatus.OK)
   @Post('log-in')
   logIn(@Body() usuario: LoginUserDto) {
@@ -22,9 +17,16 @@ export class AuthController {
 
   @HttpCode(HttpStatus.CREATED)
   @Post('sign-up')
-  async signUp(@Body() usuario: LoginUserDto) {
-    const { nombre_completo, email, password } = usuario;
-    return this.authService.signUp(nombre_completo, email, password);
+  async signUp(@Body() usuario: CreateUserDto) {
+    const { nombre_completo, email } = usuario;
+    return this.authService.signUp(nombre_completo, email);
+  }
+
+  @HttpCode(HttpStatus.OK)
+  @Post('activate')
+  async activate(@Body() usuario: ActivateDto) {
+    const { token, password } = usuario;
+    return this.authService.createPasswordHash(password, token);
   }
 }
  

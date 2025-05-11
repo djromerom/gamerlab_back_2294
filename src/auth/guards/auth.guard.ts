@@ -1,15 +1,19 @@
-import { CanActivate, ExecutionContext, Injectable, SetMetadata, UnauthorizedException } from '@nestjs/common';
+import { CanActivate, ExecutionContext, Injectable, UnauthorizedException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { Request } from 'express';
 import { Reflector } from '@nestjs/core';
+import { IS_PUBLIC_KEY } from '../decorators/public.decorator';
+import { AuthService } from '../auth.service';
 
-export const IS_PUBLIC_KEY = 'isPublic';
-export const Public = () => SetMetadata(IS_PUBLIC_KEY, true);
 
 
 @Injectable()
 export class AuthGuard implements CanActivate {
-  constructor(private readonly jwtService: JwtService,private reflector:Reflector) {}
+  constructor(
+    private readonly jwtService: JwtService,
+    private reflector:Reflector,
+    private readonly authService: AuthService,
+  ) {}
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
 
@@ -36,6 +40,15 @@ export class AuthGuard implements CanActivate {
       });
 
       console.log({ payload });
+
+      if (!payload) {
+        throw new UnauthorizedException('Token no válido');
+      }
+
+      const validUser = await this.authService.validateUserById(payload.id);
+      if (!validUser) {
+        throw new UnauthorizedException('Token no válido');
+      }
 
       request['user'] = payload;
 
