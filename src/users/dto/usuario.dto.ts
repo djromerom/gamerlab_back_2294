@@ -1,5 +1,11 @@
-import { IsEmail, IsNotEmpty, IsString } from 'class-validator';
+import { IsArray, IsEmail, ArrayNotEmpty, IsString, IsNotEmpty, IsEnum } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
+
+export enum Roles {
+  ESTUDIANTE = 'ESTUDIANTE',
+  PROFESOR = 'PROFESOR',
+  JURADO = 'JURADO',
+}
 
 export class UsuarioDTO {
   @ApiProperty()
@@ -16,4 +22,11 @@ export class UsuarioDTO {
   @IsString()
   @IsNotEmpty()
   hash_contrasena: string;
+
+  @ApiProperty( { isArray: true, enum: Roles, enumName: 'Roles' })
+  @IsArray()
+  @IsString( { each: true })
+  @ArrayNotEmpty( { each: true })
+  @IsEnum(Roles, { each: true })
+  Roles: Roles[];
 }

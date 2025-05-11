@@ -33,6 +33,11 @@ export class EstudianteService {
           nombre_completo: createEstudianteDto.nombre_completo,
           email: createEstudianteDto.email,
           hash_contrasena: await this.passwordService.hashPassword('123456'), // Contraseña por defecto
+          roles: {
+            create: {
+              id_rol: 2, // Rol de estudiante
+            },
+          }
         },
       });
     }

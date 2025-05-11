@@ -1,18 +1,50 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { UsuarioDTO } from './dto/usuario.dto';
+import { PasswordService } from 'src/common/services/password.service';
 
 @Injectable()
 export class UsuariosService {
-  constructor(private prismaService: PrismaService) {}
+  constructor(
+    private prismaService: PrismaService,
+    private passwordService: PasswordService,
+  ) {}
 
   async createUsuario(data: UsuarioDTO) {
+    // Verificar si el usuario ya existe
+    const existingUsuario = await this.prismaService.usuario.findUnique({
+      where: { email: data.email },
+    });
+
+    if (existingUsuario) {
+      throw new NotFoundException(`Usuario con email ${data.email} ya existe`);
+    }
+
+    // Verificar si el rol existe
+    const existingRoles = await this.prismaService.rol.findMany({
+      where: {
+        nombre: { in: data.Roles },
+        deleted: false,
+      },
+    });
+
+    // Crear el nuevo usuario
     return this.prismaService.usuario.create({
       data: {
         nombre_completo: data.nombre_completo,
         email: data.email,
-        hash_contrasena: data.hash_contrasena,
+        hash_contrasena: await this.passwordService.hashPassword(data.hash_contrasena),
         deleted: false,
+        roles: {
+          createMany: {
+            data: existingRoles.map((rol) => ({
+              id_rol: rol.id,
+            })),
+          }
+        },
+      },
+      include: {
+        nrcs: true,
       },
     });
   }
