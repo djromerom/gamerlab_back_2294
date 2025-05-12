@@ -11,4 +11,4 @@ RUN npm run build
 ARG PORT=3000
 EXPOSE ${PORT}
 
-CMD [ "node", "dist/main.js" ]
+CMD [ "node", "dist/src/main.js" ]
