@@ -41,7 +41,7 @@ export class EvaluacionController {
 
   @Get('notaVideojuego/:videojuegoId/:juradoId')
   async getEvaluacionesPorVideojuego(
-    @Param('id') id: string,
+    @Param('videojuegoId') id: string,
     @Param('juradoId') juradoId: string,
   ) {
     return this.evaluacionService.getEvaluacionesPorVideojuego(
@@ -55,7 +55,7 @@ export class EvaluacionController {
     status: 200,
     description: 'Obtener toda la info de un videojuego por ID',
   })
-  async getVideojuegoPorId(@Param('id') id: string) {
+  async getVideojuegoPorId(@Param('videojuegoId') id: string) {
     return this.evaluacionService.getVideojuegoPorId(Number(id));
   }
 
