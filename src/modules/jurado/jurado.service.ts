@@ -9,11 +9,12 @@ import { ConfirmarJuradoDto } from './dto/confirmar-Jurado.dto';
 import { UpdateJuradoDto } from './dto/update-jurado.dto';
 import { DetalleCriterioEvaluadoDto } from './dto/detalle-evaluacion-criterio.dto';
 import { EvaluacionRealizadaDto } from './dto/evaluacion-realizada.dto';
+import { AsignarVideojuegoDto } from './dto/asignar-videojuego.dto';
 import { PrismaService } from '../../prisma/prisma.service';
 import { MailService } from '../../common/mail.service';
 import * as bcrypt from 'bcrypt';
 import * as crypto from 'crypto';
-import { EstadoJurado } from '@prisma/client';
+import { EstadoJurado, Prisma } from '@prisma/client';
 
 @Injectable()
 export class JuradoService {
@@ -421,4 +422,102 @@ export class JuradoService {
       );
     }
   }
+
+  async asignarVideojuego(asignarDto: AsignarVideojuegoDto): Promise<any> {
+    const { juradoId, videojuegoId } = asignarDto;
+
+    // 1. Verificar si el jurado existe y no está eliminado
+    const jurado = await this.prisma.jurado.findUnique({
+      where: { 
+        id: juradoId,
+        deleted: false
+      },
+    });
+    if (!jurado) {
+      throw new NotFoundException(`Jurado con ID "${juradoId}" no encontrado o está eliminado.`);
+    }
+
+    // 2. Verificar si el videojuego existe y no está eliminado
+    const videojuego = await this.prisma.videojuego.findUnique({
+      where: { 
+        id: videojuegoId,
+        deleted: false
+      },
+    });
+    if (!videojuego) {
+      throw new NotFoundException(`Videojuego con ID "${videojuegoId}" no encontrado o está eliminado.`);
+    }
+
+    // 3. Intentar crear la asignación
+    try {
+      const nuevaAsignacion = await this.prisma.videojuegoAsignado.create({
+        data: {
+          
+          id_jurado: juradoId,
+          id_videojuego: videojuegoId,
+          
+        },
+        // Opcional
+        include: {
+          jurado: { 
+            select: { 
+              id: true, 
+              usuario: { select: { nombre_completo: true, email: true } } 
+            } 
+          },
+          videojuego: { 
+            select: { 
+              id: true, 
+              nombre_videojuego: true 
+            } 
+          }
+        }
+      });
+      
+      
+      return { 
+        message: 'Videojuego asignado al jurado exitosamente.', 
+        
+      };
+
+    } catch (error) {
+      if (error instanceof Prisma.PrismaClientKnownRequestError) {
+        
+        if (error.code === 'P2002') { 
+          throw new ConflictException(
+            `El jurado con ID "${juradoId}" ya tiene asignado el videojuego con ID "${videojuegoId}".`
+          );
+        }
+      }
+      console.error('Error al asignar videojuego a jurado:', error);
+      throw new InternalServerErrorException(
+        'Ocurrió un error inesperado al realizar la asignación.'
+      );
+    }
+  }
+
+  async desasignarVideojuego(juradoId: number, videojuegoId: number): Promise<void> {
+  const asignacionExistente = await this.prisma.videojuegoAsignado.findUnique({
+    where: {
+      id_videojuego_id_jurado: { 
+        id_jurado: juradoId,
+        id_videojuego: videojuegoId,
+      },
+    },
+  });
+
+  
+
+  await this.prisma.videojuegoAsignado.update({
+    where: {
+      id_videojuego_id_jurado: {
+        id_jurado: juradoId,
+        id_videojuego: videojuegoId,
+      },
+    },
+    data: {
+      deleted: true,
+    },
+  });
+}
 }

@@ -17,6 +17,7 @@ import {
 import { JuradoService } from './jurado.service';
 import { CreateJuradoDto } from './dto/create-jurado.dto';
 import { UpdateJuradoDto } from './dto/update-jurado.dto';
+import { AsignarVideojuegoDto } from './dto/asignar-videojuego.dto';
 import { ConfirmarJuradoDto } from './dto/confirmar-Jurado.dto';
 import { EvaluacionRealizadaDto } from './dto/evaluacion-realizada.dto';
 import { DetalleCriterioEvaluadoDto } from './dto/detalle-evaluacion-criterio.dto';
@@ -170,4 +171,38 @@ export class JuradoController {
   ): Promise<DetalleCriterioEvaluadoDto[]> {
     return this.juradoService.findDetalleEvaluacionVideojuego(Number(juradoId), Number(videojuegoId));
   }
+
+  @Post('asignar-videojuego') // POST /jurado/asignar-videojuego
+  // @UseGuards(JwtAuthGuard, RolesGuard) // Descomenta y configura tus guardas
+  // @Roles(RolNombre.ADMIN)             // Ejemplo: Solo rol ADMIN puede asignar
+  @HttpCode(HttpStatus.CREATED)
+  @ApiOperation({ summary: 'Asignar un videojuego a un jurado (Admin)' })
+  @ApiBody({ type: AsignarVideojuegoDto })
+  @ApiResponse({ status: 201, description: 'Videojuego asignado exitosamente al jurado.'})
+  @ApiResponse({ status: 400, description: 'Datos de entrada inválidos (IDs faltantes o incorrectos).' })
+  @ApiResponse({ status: 401, description: 'No autorizado (token JWT faltante o inválido).' })
+  @ApiResponse({ status: 403, description: 'Prohibido (rol no permitido para esta acción).' })
+  @ApiResponse({ status: 404, description: 'Jurado o Videojuego no encontrado o eliminado.' })
+  @ApiResponse({ status: 409, description: 'Conflicto: Esta asignación ya existe.' })
+  @ApiResponse({ status: 500, description: 'Error interno del servidor.' })
+  async asignarVideojuego(@Body() asignarDto: AsignarVideojuegoDto) {
+    return this.juradoService.asignarVideojuego(asignarDto);
+  }
+
+  @Delete(':juradoId/asignaciones/:videojuegoId') // <--- AQUÍ SE DEFINEN LOS PARÁMETROS DE RUTA
+// @UseGuards(...)
+// @Roles(...)
+@HttpCode(HttpStatus.NO_CONTENT)
+@ApiOperation({ summary: 'Desasignar (eliminar asignación) un videojuego de un jurado (Admin)' })
+@ApiParam({ name: 'juradoId', description: 'ID del Jurado', type: Number })         // <--- Swagger doc para juradoId
+@ApiParam({ name: 'videojuegoId', description: 'ID del Videojuego', type: Number }) // <--- Swagger doc para videojuegoId
+@ApiResponse({ status: 204, description: 'Asignación eliminada (marcada como eliminada) exitosamente.'})
+// ... otras respuestas de API
+async desasignarVideojuego(
+  @Param('juradoId', ParseIntPipe) juradoId: number,         // <--- Se extrae juradoId de la ruta
+  @Param('videojuegoId', ParseIntPipe) videojuegoId: number, // <--- Se extrae videojuegoId de la ruta
+): Promise<void> {
+  await this.juradoService.desasignarVideojuego(juradoId, videojuegoId);
+  // No se devuelve nada en el cuerpo para HTTP 204
+}
 }
