@@ -11,6 +11,9 @@ import { AdminNrcModule } from './modules/Admin/nrc/adminNrc.module';
 import { MateriaModule } from './modules/Admin/materia/materia.module';
 import { AuthModule } from './auth/auth.module';
 import { UsersModule } from './users/users.module';
+import { PrismaModule } from './prisma/prisma.module';
+import { MailModule } from './common/mail.module';
+
 
 @Module({
   imports: [
@@ -18,6 +21,7 @@ import { UsersModule } from './users/users.module';
       isGlobal: true,
       envFilePath: '.env',
     }),
+    PrismaModule,
     EvaluacionModule,
     EquipoModule, 
     VideojuegoModule, 
@@ -29,6 +33,7 @@ import { UsersModule } from './users/users.module';
     MateriaModule,
     AuthModule,
     UsersModule,
+    MailModule,
   ],
   providers: [], 
 })

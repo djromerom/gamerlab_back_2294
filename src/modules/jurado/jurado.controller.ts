@@ -1,193 +1,173 @@
 import {
-    Controller,
-    Get,
-    Post,
-    Body,
-    Patch,
-    Param,
-    Delete,
-    HttpStatus,
-    UseInterceptors,
-    ClassSerializerInterceptor,
-    SerializeOptions,
-    ParseIntPipe
+  Controller,
+  Post,
+  Body,
+  HttpCode,
+  HttpStatus,
+  Get,
+  Param,
+  Patch,
+  Delete,
+  ParseIntPipe,
+  NotFoundException,
+  UseInterceptors,
+  ClassSerializerInterceptor,
+  SerializeOptions,
 } from '@nestjs/common';
 import { JuradoService } from './jurado.service';
 import { CreateJuradoDto } from './dto/create-jurado.dto';
 import { UpdateJuradoDto } from './dto/update-jurado.dto';
+import { ConfirmarJuradoDto } from './dto/confirmar-Jurado.dto';
+import { EvaluacionRealizadaDto } from './dto/evaluacion-realizada.dto';
+import { DetalleCriterioEvaluadoDto } from './dto/detalle-evaluacion-criterio.dto';
 import {
-    ApiCreatedResponse,
-    ApiNotFoundResponse,
-    ApiOkResponse,
-    ApiTags,
-    ApiResponse
+  ApiTags,
+  ApiOperation,
+  ApiResponse,
+  ApiBody,
+  ApiParam,
+  ApiCreatedResponse,
+  ApiOkResponse,
+  ApiNotFoundResponse,
+  ApiConflictResponse,
+  ApiForbiddenResponse,
+  ApiNoContentResponse,
 } from '@nestjs/swagger';
-import { JuradoEntity } from './entities/jurado.entity';
 
-@ApiTags('jurado')
+@ApiTags('Jurado')
 @Controller('jurado')
-@UseInterceptors(ClassSerializerInterceptor)
-@SerializeOptions({ type: JuradoEntity })
+// @UseInterceptors(ClassSerializerInterceptor)
+// @SerializeOptions({ type: JuradoEntity })
 export class JuradoController {
-    constructor(private readonly juradoService: JuradoService) { }
+  constructor(private readonly juradoService: JuradoService) {}
 
-    @Post()
-    @ApiCreatedResponse({
-        type: JuradoEntity,
-        description: 'Jurado creado exitosamente.'
-    })
-    @ApiResponse({
-        status: HttpStatus.UNAUTHORIZED,
-        description: 'Acción no autorizada.'
-    })
-    @ApiResponse({
-        status: HttpStatus.BAD_REQUEST,
-        description: 'Datos inválidos proporcionados.'
-    })
-    @ApiResponse({
-        status: HttpStatus.CONFLICT,
-        description: 'El usuario ya está registrado como jurado.'
-    })
-    create(@Body() createJuradoDto: CreateJuradoDto) {
-        return this.juradoService.create(createJuradoDto);
-    }
+  @Post()
+  @HttpCode(HttpStatus.CREATED)
+  @ApiOperation({ summary: 'Crear un nuevo jurado' })
+  @ApiBody({ type: CreateJuradoDto })
+  @ApiCreatedResponse({ description: 'El jurado ha sido creado exitosamente.' })
+  @ApiResponse({ status: HttpStatus.BAD_REQUEST, description: 'Datos de entrada inválidos.' })
+  @ApiConflictResponse({ description: 'El correo electrónico ya existe.' })
+  @ApiForbiddenResponse({ description: 'Forbidden. Rol no autorizado.' })
+  @ApiResponse({ status: HttpStatus.INTERNAL_SERVER_ERROR, description: 'Error interno del servidor.' })
+  create(@Body() createJuradoDto: CreateJuradoDto) {
+    return this.juradoService.create(createJuradoDto);
+  }
 
-    @Get()
-    @ApiOkResponse({
-        type: JuradoEntity,
-        isArray: true,
-        description: 'Lista de jurados obtenida exitosamente.'
-    })
-    @ApiResponse({
-        status: HttpStatus.UNAUTHORIZED,
-        description: 'Acción no autorizada.'
-    })
-    findAll() {
-        return this.juradoService.findAll();
-    }
+  @Get()
+  @ApiOperation({ summary: 'Obtener lista de todos los jurados (activos)' })
+  @ApiOkResponse({ description: 'Lista de jurados obtenida exitosamente.' })
+  @ApiForbiddenResponse({ description: 'Forbidden. Rol no autorizado.' })
+  @ApiResponse({ status: HttpStatus.INTERNAL_SERVER_ERROR, description: 'Error interno del servidor.' })
+  findAll() {
+    return this.juradoService.findAll();
+  }
 
-    @Get(':id')
-    @ApiOkResponse({
-        type: JuradoEntity,
-        description: 'Jurado encontrado.'
-    })
-    @ApiNotFoundResponse({
-        description: 'Jurado no encontrado.'
-    })
-    @ApiResponse({
-        status: HttpStatus.UNAUTHORIZED,
-        description: 'Acción no autorizada.'
-    })
-    findOne(@Param('id', ParseIntPipe) id: number) {
-        return this.juradoService.findOne(id);
-    }
+  @Get(':id')
+  @ApiOperation({ summary: 'Obtener un jurado específico por ID' })
+  @ApiParam({ name: 'id', description: 'ID numérico del jurado', type: Number })
+  @ApiOkResponse({ description: 'Jurado encontrado exitosamente.' })
+  @ApiNotFoundResponse({ description: 'Jurado no encontrado.' })
+  @ApiResponse({ status: HttpStatus.BAD_REQUEST, description: 'ID inválido (no es un número).' })
+  @ApiForbiddenResponse({ description: 'Forbidden. Rol no autorizado.' })
+  @ApiResponse({ status: HttpStatus.INTERNAL_SERVER_ERROR, description: 'Error interno del servidor.' })
+  async findOne(@Param('id', ParseIntPipe) id: number) {
+     const jurado = await this.juradoService.findOne(id);
+     if (!jurado) {
+       throw new NotFoundException(`Jurado con ID "${id}" no encontrado.`);
+     }
+     return jurado;
+  }
 
-    @Get('confirmar/:token')
-    @ApiOkResponse({
-        type: JuradoEntity,
-        description: 'Jurado confirmado exitosamente.'
-    })
-    @ApiNotFoundResponse({
-        description: 'Token de confirmación inválido.'
-    })
-    confirmarJurado(@Param('token') token: string) {
-        return this.juradoService.confirmarJurado(token);
-    }
+  @Patch(':id')
+  @ApiOperation({ summary: 'Actualizar un jurado por ID' })
+  @ApiParam({ name: 'id', description: 'ID numérico del jurado a actualizar', type: Number })
+  @ApiBody({ type: UpdateJuradoDto })
+  @ApiOkResponse({ description: 'Jurado actualizado exitosamente.' })
+  @ApiNotFoundResponse({ description: 'Jurado no encontrado.' })
+  @ApiResponse({ status: HttpStatus.BAD_REQUEST, description: 'Datos inválidos (ID o cuerpo de la solicitud).' })
+  @ApiConflictResponse({ description: 'Conflicto (ej. email duplicado).' })
+  @ApiForbiddenResponse({ description: 'Forbidden. Rol no autorizado.' })
+  @ApiResponse({ status: HttpStatus.INTERNAL_SERVER_ERROR, description: 'Error interno del servidor.' })
+  update(
+    @Param('id', ParseIntPipe) id: number,
+    @Body() updateJuradoDto: UpdateJuradoDto,
+  ) {
+    return this.juradoService.update(id, updateJuradoDto);
+  }
 
-    @Patch(':id/reenviar-invitacion')
-    @ApiOkResponse({
-        type: JuradoEntity,
-        description: 'Invitación reenviada exitosamente.'
-    })
-    @ApiNotFoundResponse({
-        description: 'Jurado no encontrado.'
-    })
-    reenviarInvitacion(@Param('id', ParseIntPipe) id: number) {
-        return this.juradoService.reenviarInvitacion(id);
-    }
+  @Delete(':id')
+  @HttpCode(HttpStatus.NO_CONTENT)
+  @ApiOperation({ summary: 'Eliminar un jurado por ID (borrado lógico)' })
+  @ApiParam({ name: 'id', description: 'ID numérico del jurado a eliminar', type: Number })
+  @ApiNoContentResponse({ description: 'Jurado eliminado (marcado) exitosamente.' })
+  @ApiNotFoundResponse({ description: 'Jurado no encontrado.' })
+  @ApiResponse({ status: HttpStatus.BAD_REQUEST, description: 'ID inválido (no es un número).' })
+  @ApiForbiddenResponse({ description: 'Forbidden. Rol no autorizado.' })
+  @ApiResponse({ status: HttpStatus.INTERNAL_SERVER_ERROR, description: 'Error interno del servidor.' })
+  remove(@Param('id', ParseIntPipe) id: number) {
+    return this.juradoService.remove(id);
+  }
 
-    @Post(':id/asignar-videojuego/:videojuegoId')
-    @ApiOkResponse({
-        type: JuradoEntity,
-        description: 'Videojuego asignado exitosamente.'
-    })
-    @ApiNotFoundResponse({
-        description: 'Jurado o videojuego no encontrado.'
-    })
-    @ApiResponse({
-        status: HttpStatus.BAD_REQUEST,
-        description: 'El videojuego ya está asignado a este jurado.'
-    })
-    asignarVideojuego(
-        @Param('id', ParseIntPipe) id: number,
-        @Param('videojuegoId', ParseIntPipe) videojuegoId: number
-    ) {
-        return this.juradoService.asignarVideojuego(id, videojuegoId);
-    }
+  @Patch('confirmar-invitacion')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'Confirmar invitación de jurado y establecer contraseña inicial' })
+  @ApiBody({ type: ConfirmarJuradoDto })
+  @ApiOkResponse({ description: 'Cuenta de jurado confirmada y contraseña establecida.'})
+  @ApiResponse({ status: HttpStatus.BAD_REQUEST, description: 'Datos de entrada inválidos (ej. token o contraseña).' })
+  @ApiNotFoundResponse({ description: 'Token inválido o jurado no encontrado.' })
+  @ApiResponse({ status: HttpStatus.INTERNAL_SERVER_ERROR, description: 'Error interno del servidor.' })
+  async confirmarYEstablecerContrasena(@Body() confirmarJuradoDto: ConfirmarJuradoDto) {
+    return this.juradoService.confirmarInvitacionYEstablecerContrasena(
+      confirmarJuradoDto,
+    );
+  }
 
-    @Delete(':id/eliminar-asignacion/:videojuegoId')
-    @ApiOkResponse({
-        type: JuradoEntity,
-        description: 'Asignación eliminada exitosamente.'
-    })
-    @ApiNotFoundResponse({
-        description: 'Jurado, videojuego o asignación no encontrada.'
-    })
-    eliminarAsignacion(
-        @Param('id', ParseIntPipe) id: number,
-        @Param('videojuegoId', ParseIntPipe) videojuegoId: number
-    ) {
-        return this.juradoService.eliminarAsignacion(id, videojuegoId);
-    }
+  @Patch(':id/reenviar-invitacion')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'Reenviar el correo de invitación a un jurado existente' })
+  @ApiParam({ name: 'id', description: 'ID numérico del jurado', type: Number })
+  @ApiOkResponse({ description: 'Correo de invitación reenviado exitosamente.' })
+  @ApiNotFoundResponse({ description: 'Jurado no encontrado.' })
+  @ApiConflictResponse({ description: 'El jurado ya ha sido confirmado.' })
+  @ApiForbiddenResponse({ description: 'Forbidden. Rol no autorizado.' })
+  @ApiResponse({ status: HttpStatus.BAD_REQUEST, description: 'ID inválido (no es un número).' })
+  @ApiResponse({ status: HttpStatus.INTERNAL_SERVER_ERROR, description: 'Error interno del servidor.' })
+  async reenviarInvitacion(@Param('id', ParseIntPipe) id: number) {
+    return this.juradoService.reenviarInvitacion(id);
+  }
 
-    @Patch(':id')
-    @ApiOkResponse({
-        type: JuradoEntity,
-        description: 'Jurado actualizado exitosamente.'
-    })
-    @ApiNotFoundResponse({
-        description: 'Jurado no encontrado.'
-    })
-    @ApiResponse({
-        status: HttpStatus.UNAUTHORIZED,
-        description: 'Acción no autorizada.'
-    })
-    update(
-        @Param('id', ParseIntPipe) id: number,
-        @Body() updateJuradoDto: UpdateJuradoDto
-    ) {
-        return this.juradoService.update(id, updateJuradoDto);
-    }
+  @Get(':id/evaluaciones')
+  @ApiOperation({ summary: 'Obtener evaluaciones realizadas por un jurado específico' })
+  @ApiOkResponse({
+    description: 'Lista de evaluaciones realizadas por el jurado.',
+    type: [EvaluacionRealizadaDto],
+  })
+  @ApiForbiddenResponse({ description: 'Forbidden. Rol no autorizado.' })
+  @ApiNotFoundResponse({ description: 'Jurado no encontrado.' })
+  @ApiParam({ name: 'id', description: 'ID del Jurado', type: String })
+  async findEvaluacionesRealizadas(
+    @Param('id') juradoId: string,
+  ): Promise<EvaluacionRealizadaDto[]> {
+    return this.juradoService.findEvaluacionesRealizadas(juradoId);
+  }
 
-    @Delete(':id')
-    @ApiOkResponse({
-        type: JuradoEntity,
-        description: 'Jurado eliminado exitosamente.'
-    })
-    @ApiNotFoundResponse({
-        description: 'Jurado no encontrado.'
-    })
-    @ApiResponse({
-        status: HttpStatus.UNAUTHORIZED,
-        description: 'Acción no autorizada.'
-    })
-    remove(@Param('id', ParseIntPipe) id: number) {
-        return this.juradoService.remove(id);
-    }
-
-    @Get(':id/videojuegos-asignados')
-    @ApiOkResponse({
-        type: JuradoEntity,
-        description: 'Lista de videojuegos asignados obtenida exitosamente.'
-    })
-    @ApiNotFoundResponse({
-        description: 'Jurado no encontrado.'
-    })
-    @ApiResponse({
-        status: HttpStatus.UNAUTHORIZED,
-        description: 'Acción no autorizada.'
-    })
-    getVideojuegosAsignados(@Param('id', ParseIntPipe) id: number) {
-        return this.juradoService.getVideojuegosAsignados(id);
-    }
+  @Get(':juradoId/evaluaciones/:videojuegoId')
+  @ApiOperation({
+    summary: 'Obtener el detalle de la calificación de un videojuego por un jurado.',
+  })
+  @ApiOkResponse({
+    description: 'Detalle de la calificación por criterios.',
+    type: [DetalleCriterioEvaluadoDto],
+  })
+  @ApiForbiddenResponse({ description: 'Forbidden. Rol no autorizado.' })
+  @ApiNotFoundResponse({ description: 'Jurado, videojuego o evaluación no encontrados.' })
+  @ApiParam({ name: 'juradoId', description: 'ID del Jurado', type: String })
+  @ApiParam({ name: 'videojuegoId', description: 'ID del Videojuego', type: String })
+  async findDetalleEvaluacionVideojuego(
+    @Param('juradoId') juradoId: string,
+    @Param('videojuegoId') videojuegoId: string,
+  ): Promise<DetalleCriterioEvaluadoDto[]> {
+    return this.juradoService.findDetalleEvaluacionVideojuego(Number(juradoId), Number(videojuegoId));
+  }
 }
