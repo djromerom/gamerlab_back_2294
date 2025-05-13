@@ -2,7 +2,7 @@ import { Module } from '@nestjs/common';
 import { EquipoModule } from './modules/equipo/equipo.module';
 import { VideojuegoModule } from './modules/videojuego/videojuego.module';
 import { ConfigModule } from '@nestjs/config';
-// import { StorageModule } from './modules/storage/storage.module'
+import { StorageModule } from './modules/storage/storage.module'
 import { JuradoModule } from './modules/jurado/jurado.module';
 import { EvaluacionModule } from './modules/evaluacion/evaluacion.module'
 import { ReportsModule } from './modules/reports/reports.module';
@@ -21,7 +21,7 @@ import { UsersModule } from './users/users.module';
     EvaluacionModule,
     EquipoModule, 
     VideojuegoModule, 
-    // StorageModule, // Keep this commented if you're having issues with Supabase
+    StorageModule, // Keep this commented if you're having issues with Supabase
     JuradoModule,
     ReportsModule,
     CriterioModule,
