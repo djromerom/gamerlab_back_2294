@@ -11,6 +11,7 @@ import { AdminNrcModule } from './modules/Admin/nrc/adminNrc.module';
 import { MateriaModule } from './modules/Admin/materia/materia.module';
 import { AuthModule } from './auth/auth.module';
 import { UsersModule } from './users/users.module';
+import { AnalyticsModule } from './modules/Admin/analytics/analytics.module';
 
 @Module({
   imports: [
@@ -29,6 +30,7 @@ import { UsersModule } from './users/users.module';
     MateriaModule,
     AuthModule,
     UsersModule,
+    AnalyticsModule,
   ],
   providers: [], 
 })
