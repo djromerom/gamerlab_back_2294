@@ -17,7 +17,6 @@ export class RubricaDto {
 export class CreateEvaluacionDto {
   @ApiProperty()
   @IsString()
-  @IsNotEmpty()
   comentarios: string;
 
   @ApiProperty({ type: [RubricaDto] })

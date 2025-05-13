@@ -7,6 +7,7 @@ import { MateriaModule } from './modules/materia/materia.module';
 import { NrcModule } from './modules/nrc/nrc.module';
 // import { StorageModule } from './modules/storage/storage.module'; // Keep this commented if you're having issues with Supabase
 import { JuradoModule } from './modules/jurado/jurado.module';
+import { EvaluacionModule } from './modules/evaluacion/evaluacion.module';
 
 
 @Module({
@@ -22,6 +23,7 @@ import { JuradoModule } from './modules/jurado/jurado.module';
     NrcModule,
     // StorageModule, // Keep this commented if you're having issues with Supabase
     JuradoModule,
+    EvaluacionModule,
   ],
   providers: [], 
 })
