@@ -90,6 +90,21 @@ export class EquipoService {
         },
         videojuegos: {
           where: { deleted: false },
+          include: {
+            evaluaciones: {
+              where: { deleted: false },
+              include: {
+                rubricas: {
+                  include: {
+                    criterio: true,
+                  },
+                  where: {
+                    deleted: false,
+                  }
+                },
+              },
+            },
+          },
         },
       },
     });
@@ -107,11 +122,34 @@ export class EquipoService {
       estudiantes: {
         where: { deleted: false },
         include: {
-          usuario: true
+          usuario: true,
+          estudianteNrcs: {
+            where: { deleted: false },
+            include: {
+              nrc: {
+                include: { materia: true },
+              },
+            },
+          },
         }
       },
       videojuegos: {
-        where: { deleted: false }
+        where: { deleted: false },
+        include: {
+          evaluaciones: {
+            where: { deleted: false },
+            include: {
+              rubricas: {
+                include: {
+                  criterio: true,
+                },
+                where: {
+                  deleted: false,
+                }
+              },
+            },
+          },
+        },
       }
     }
   });
@@ -129,6 +167,10 @@ export class EquipoService {
     });
 
     this.exits.validateExists('equipo', equipo);
+
+    if (equipo?.estado === Estado.Inscripcion_completa) {
+      throw new HttpException('No se puede modificar el equipo porque la inscripción está completa', HttpStatus.BAD_REQUEST);
+    }
 
     return this.prisma.equipo.update({
       where: {

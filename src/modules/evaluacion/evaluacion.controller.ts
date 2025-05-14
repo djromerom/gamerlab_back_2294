@@ -1,4 +1,13 @@
-import { Controller, Get, Post, Param, Body } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Param,
+  Body,
+  Req,
+  UseGuards,
+} from '@nestjs/common';
+
 import { EvaluacionService } from './evaluacion.service';
 import { CreateEvaluacionDto } from './dto/create-evaluacion.dto';
 import { EvaluacionEntity } from './entities/evaluacion.entity';

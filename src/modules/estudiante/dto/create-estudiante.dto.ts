@@ -1,5 +1,5 @@
 import { ApiProperty } from "@nestjs/swagger";
-import { IsString, IsNotEmpty, IsEmail } from "class-validator";
+import { IsString, IsNotEmpty, IsEmail, IsArray, IsInt, Length } from "class-validator";
 
 export class CreateEstudianteDto {
   @IsNotEmpty()
@@ -18,4 +18,11 @@ export class CreateEstudianteDto {
   @IsNotEmpty()
   @ApiProperty({required: true})
   github: string;
+
+  @ApiProperty({required:true})
+  @IsArray()
+  @IsNotEmpty()
+  @IsInt({each: true})
+  @Length(4, 4, {each: true})
+  NRCs: number[];
 }

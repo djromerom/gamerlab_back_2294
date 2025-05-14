@@ -175,6 +175,7 @@ export class EvaluacionService {
     );
   }
 
+
 async getEvaluacionesPorVideojuego(videojuegoId: number, juradoId: number)
  {
     const videojuego = await this.prisma.videojuego.findUnique({

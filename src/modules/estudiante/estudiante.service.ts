@@ -6,6 +6,7 @@ import { UpdateEstudianteDto } from './dto/update-estudiante.dto';
 import { EstudianteEntity } from './entities/estudiante.entity';
 import { EmailService } from 'src/modules/email/email.service';
 import { GenerateTokenService } from 'src/common/services/generateToken.service';
+import { PasswordService } from 'src/common/services/password.service';
 
 @Injectable()
 export class EstudianteService {
@@ -13,7 +14,8 @@ export class EstudianteService {
     private readonly prisma: PrismaService,
     private readonly exits: ValidationExitsService,
     private readonly emailService: EmailService,
-    private readonly generateTokenService: GenerateTokenService
+    private readonly generateTokenService: GenerateTokenService,
+    private readonly passwordService: PasswordService,
   ) { }
 
   async create(id_equipo: number, createEstudianteDto: CreateEstudianteDto) {
@@ -30,7 +32,12 @@ export class EstudianteService {
         data: {
           nombre_completo: createEstudianteDto.nombre_completo,
           email: createEstudianteDto.email,
-          hash_contrasena: '1234567',
+          hash_contrasena: await this.passwordService.hashPassword('123456'), // Contraseña por defecto
+          roles: {
+            create: {
+              id_rol: 2, // Rol de estudiante
+            },
+          }
         },
       });
     }
@@ -52,6 +59,20 @@ export class EstudianteService {
       throw new HttpException('El estudiante ya existe', HttpStatus.BAD_REQUEST);
     }
 
+    // verificar los NRCs
+    const nrcs = await this.prisma.nRC.findMany({
+      where: {
+        codigo_nrc: {
+          in: createEstudianteDto.NRCs,
+        },
+        deleted: false,
+      },
+    });
+
+    if (nrcs.length !== createEstudianteDto.NRCs.length) {
+      throw new HttpException('Uno o más NRCs no existen', HttpStatus.BAD_REQUEST);
+    }
+
     // Generar token para la confirmación por correo
     const confirmationToken = this.generateTokenService.generateToken();
 
@@ -63,6 +84,27 @@ export class EstudianteService {
         id_user: usuario.id,
         github: createEstudianteDto.github,
         token_confirmacion: confirmationToken, // Añadir esta columna en la próxima migración
+        estudianteNrcs: {
+          createMany: {
+            data: createEstudianteDto.NRCs.map(nrc => ({
+              id_nrc: nrc,
+            })),
+          },
+        },
+      },
+      include: {
+        usuario: {
+          select: {
+            nombre_completo: true,
+            email: true,
+          },
+        },
+        equipo: {
+          select: {
+            id: true,
+            nombre_equipo: true,
+          },
+        },
       },
     });
 
@@ -148,6 +190,10 @@ export class EstudianteService {
           },
         },
       },
+      include: {
+        usuario: true,
+        estudianteNrcs: true
+      },
     });
   }
 
@@ -161,7 +207,7 @@ export class EstudianteService {
 
     this.exits.validateExists('estudiante', estudiante);
 
-    return this.prisma.estudiante.update({
+    await this.prisma.estudiante.update({
       where: { id },
       data: {
         deleted: true,
@@ -179,14 +225,12 @@ export class EstudianteService {
     });
 
     if (!estudiante) {
-      console.log('Token no encontrado:', token);
-      throw new HttpException('Token de confirmación no válido este', HttpStatus.NOT_FOUND);
-    }
+    throw new HttpException('Token de confirmación no válido', HttpStatus.NOT_FOUND);
+  }
 
-    if (estudiante.confirmado) {
-      throw new HttpException('El estudiante ya está confirmado', HttpStatus.BAD_REQUEST);
-    }
-    
+  if (estudiante.confirmado) {
+    throw new HttpException('El estudiante ya está confirmado', HttpStatus.BAD_REQUEST);
+  }
     
 
     // Actualizar estado de confirmación
@@ -196,23 +240,20 @@ export class EstudianteService {
       },
       data: {
         confirmado: true,
-        token_confirmacion: null, // Borramos el token una vez usado
+        //token_confirmacion: null, // Borramos el token una vez usado
       },
       select: {
         id: true,
         confirmado: true,
         github: true,
         equipo_id: true,
-        usuario: {
-          select: {
-            nombre_completo: true,
-            email: true,
-          },
-        },
-        equipo: {
-          select: {
-            id: true,
-            nombre_equipo: true,
+        usuario: true,
+        estudianteNrcs: {
+          where: { deleted: false },
+          include: {
+            nrc: {
+              include: { materia: true },
+            },
           },
         },
       },
@@ -220,4 +261,31 @@ export class EstudianteService {
 
     return estudianteActualizado;
   }
+  // Añadir este método a EstudianteService
+
+async invalidarToken(token: string) {
+  const estudiante = await this.prisma.estudiante.findFirst({
+    where: {
+      token_confirmacion: token,
+      deleted: false,
+    },
+  });
+
+  if (!estudiante) {
+    throw new HttpException('Estudiante no encontrado', HttpStatus.NOT_FOUND);
+  }
+
+  await this.prisma.estudiante.update({
+    where: {
+      id: estudiante.id,
+    },
+    data: {
+      token_confirmacion: null, // Borramos el token una vez usado
+    },
+  });
+
+  return { message: 'Token invalidado exitosamente' };
+}
+
+
 }
