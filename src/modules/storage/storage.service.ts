@@ -44,7 +44,9 @@ export class StorageService {
     const { data: urlData } = this.supabase
       .storage
       .from('logos')
-      .getPublicUrl(fileName);
+      .getPublicUrl(fileName, {
+        download: false,
+      });
 
     return urlData.publicUrl;
   }
