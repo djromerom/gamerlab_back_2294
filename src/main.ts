@@ -15,7 +15,7 @@ async function bootstrap() {
   }));
   // In main.ts
   app.enableCors({
-    origin: 'http://localhost:3001', // Or the URL where your React app is running
+    origin: 'http://localhost:5173', // Or the URL where your React app is running
     methods: ['GET', 'POST', 'PATCH', 'DELETE', 'OPTIONS'],
     credentials: true,
   });

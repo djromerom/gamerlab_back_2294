@@ -59,7 +59,7 @@ export class EvaluacionController {
     return this.evaluacionService.getVideojuegoPorId(Number(id));
   }
 
-  @Post('evaluar/:videojuegoId/:juradoId')
+  @Post('postEvaluacion/:videojuegoId/:juradoId')
   @ApiResponse({
     status: 201,
     description: 'Evaluación creada',

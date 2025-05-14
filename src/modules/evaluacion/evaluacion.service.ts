@@ -175,8 +175,7 @@ export class EvaluacionService {
     );
   }
 
-async getEvaluacionesPorVideojuego(videojuegoId: number, juradoId: number)
- {
+  async getEvaluacionesPorVideojuego(videojuegoId: number, juradoId: number) {
     const videojuego = await this.prisma.videojuego.findUnique({
       where: { id: videojuegoId },
       select: {
@@ -201,6 +200,10 @@ async getEvaluacionesPorVideojuego(videojuegoId: number, juradoId: number)
           select: {
             id_criterio: true,
             valoracion: true,
+            /*criterio: {
+              // <- Agrega esto
+              select: { nombre: true },
+            },*/
           },
         },
       },
@@ -220,23 +223,24 @@ async getEvaluacionesPorVideojuego(videojuegoId: number, juradoId: number)
   }
 
   async getVideojuegoPorId(videojuegoId: number) {
-  const videojuego = await this.prisma.videojuego.findFirst({
-    where: {
-      id: videojuegoId,
-      deleted: false,
-    },
-    include: {
-      equipo: {
-        include: {
-          estudiantes: {
-            include: {
-              usuario: true,
-              estudianteNrcs: {
-                include: {
-                  nrc: {
-                    include: {
-                      materia: true,
-                      profesor: true,
+    const videojuego = await this.prisma.videojuego.findFirst({
+      where: {
+        id: videojuegoId,
+        deleted: false,
+      },
+      include: {
+        equipo: {
+          include: {
+            estudiantes: {
+              include: {
+                usuario: true,
+                estudianteNrcs: {
+                  include: {
+                    nrc: {
+                      include: {
+                        materia: true,
+                        profesor: true,
+                      },
                     },
                   },
                 },
@@ -244,60 +248,59 @@ async getEvaluacionesPorVideojuego(videojuegoId: number, juradoId: number)
             },
           },
         },
-      },
-      evaluaciones: {
-        where: {
-          deleted: false,
+        evaluaciones: {
+          where: {
+            deleted: false,
+          },
         },
       },
-    },
-  });
+    });
 
-  if (!videojuego || videojuego.equipo?.deleted) return null;
+    if (!videojuego || videojuego.equipo?.deleted) return null;
 
-  const estudianteNrcs = videojuego.equipo.estudiantes
-    .flatMap((est) => est.estudianteNrcs)
-    .filter(
-      (n) => !n.deleted && !n.nrc.deleted && !n.nrc.materia.deleted,
-    );
+    const estudianteNrcs = videojuego.equipo.estudiantes
+      .flatMap((est) => est.estudianteNrcs)
+      .filter((n) => !n.deleted && !n.nrc.deleted && !n.nrc.materia.deleted);
 
-  const nrcsUnicos = [
-    ...new Set(estudianteNrcs.map((n) => n.nrc.codigo_nrc)),
-  ];
-  const materiasUnicas = [
-    ...new Set(estudianteNrcs.map((n) => n.nrc.materia.nombre)),
-  ];
-  const profesoresUnicos = [
-    ...new Set(
-      estudianteNrcs
-        .map((n) => n.nrc.profesor?.nombre_completo)
-        .filter(Boolean),
-    ),
-  ];
+    const nrcsUnicos = [
+      ...new Set(estudianteNrcs.map((n) => n.nrc.codigo_nrc)),
+    ];
+    const materiasUnicas = [
+      ...new Set(estudianteNrcs.map((n) => n.nrc.materia.nombre)),
+    ];
+    const profesoresUnicos = [
+      ...new Set(
+        estudianteNrcs
+          .map((n) => n.nrc.profesor?.nombre_completo)
+          .filter(Boolean),
+      ),
+    ];
 
-  const integrantes = videojuego.equipo.estudiantes
-    .filter((e) => !e.deleted && e.usuario)
-    .map((e) => e.usuario.nombre_completo);
+    const integrantes = videojuego.equipo.estudiantes
+      .filter((e) => !e.deleted && e.usuario)
+      .map((e) => e.usuario.nombre_completo);
 
-  const yaEvaluado = videojuego.evaluaciones.length > 0;
+    const yaEvaluado = videojuego.evaluaciones.length > 0;
 
-  return {
-    id: videojuego.id,
-    nombre_videojuego: videojuego.nombre_videojuego,
-    descripcion: videojuego.descripcion,
-    equipo: {
-      nombre: videojuego.equipo.nombre_equipo,
-      logo: videojuego.equipo.url_logo,
-    },
-    integrantes,
-    nrcs: nrcsUnicos.length ? nrcsUnicos : ['NRC no asignado'],
-    materias: materiasUnicas.length ? materiasUnicas : ['Materia no asignada'],
-    profesores: profesoresUnicos.length
-      ? profesoresUnicos
-      : ['Profesor no asignado'],
-    estado: yaEvaluado,
-  };
-}
+    return {
+      id: videojuego.id,
+      nombre_videojuego: videojuego.nombre_videojuego,
+      descripcion: videojuego.descripcion,
+      equipo: {
+        nombre: videojuego.equipo.nombre_equipo,
+        logo: videojuego.equipo.url_logo,
+      },
+      integrantes,
+      nrcs: nrcsUnicos.length ? nrcsUnicos : ['NRC no asignado'],
+      materias: materiasUnicas.length
+        ? materiasUnicas
+        : ['Materia no asignada'],
+      profesores: profesoresUnicos.length
+        ? profesoresUnicos
+        : ['Profesor no asignado'],
+      estado: yaEvaluado,
+    };
+  }
 
   async crearEvaluacion(
     juradoId: number,
