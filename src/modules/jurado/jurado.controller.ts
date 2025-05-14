@@ -37,8 +37,6 @@ import {
 
 @ApiTags('Jurado')
 @Controller('jurado')
-// @UseInterceptors(ClassSerializerInterceptor)
-// @SerializeOptions({ type: JuradoEntity })
 export class JuradoController {
   constructor(private readonly juradoService: JuradoService) {}
 
@@ -172,9 +170,7 @@ export class JuradoController {
     return this.juradoService.findDetalleEvaluacionVideojuego(Number(juradoId), Number(videojuegoId));
   }
 
-  @Post('asignar-videojuego') // POST /jurado/asignar-videojuego
-  // @UseGuards(JwtAuthGuard, RolesGuard) // Descomenta y configura tus guardas
-  // @Roles(RolNombre.ADMIN)             // Ejemplo: Solo rol ADMIN puede asignar
+  @Post('asignar-videojuego') 
   @HttpCode(HttpStatus.CREATED)
   @ApiOperation({ summary: 'Asignar un videojuego a un jurado (Admin)' })
   @ApiBody({ type: AsignarVideojuegoDto })
@@ -189,20 +185,16 @@ export class JuradoController {
     return this.juradoService.asignarVideojuego(asignarDto);
   }
 
-  @Delete(':juradoId/asignaciones/:videojuegoId') // <--- AQUÍ SE DEFINEN LOS PARÁMETROS DE RUTA
-// @UseGuards(...)
-// @Roles(...)
+  @Delete(':juradoId/asignaciones/:videojuegoId')
 @HttpCode(HttpStatus.NO_CONTENT)
 @ApiOperation({ summary: 'Desasignar (eliminar asignación) un videojuego de un jurado (Admin)' })
-@ApiParam({ name: 'juradoId', description: 'ID del Jurado', type: Number })         // <--- Swagger doc para juradoId
-@ApiParam({ name: 'videojuegoId', description: 'ID del Videojuego', type: Number }) // <--- Swagger doc para videojuegoId
+@ApiParam({ name: 'juradoId', description: 'ID del Jurado', type: Number })         
+@ApiParam({ name: 'videojuegoId', description: 'ID del Videojuego', type: Number }) 
 @ApiResponse({ status: 204, description: 'Asignación eliminada (marcada como eliminada) exitosamente.'})
-// ... otras respuestas de API
 async desasignarVideojuego(
-  @Param('juradoId', ParseIntPipe) juradoId: number,         // <--- Se extrae juradoId de la ruta
-  @Param('videojuegoId', ParseIntPipe) videojuegoId: number, // <--- Se extrae videojuegoId de la ruta
+  @Param('juradoId', ParseIntPipe) juradoId: number,        
+  @Param('videojuegoId', ParseIntPipe) videojuegoId: number, 
 ): Promise<void> {
   await this.juradoService.desasignarVideojuego(juradoId, videojuegoId);
-  // No se devuelve nada en el cuerpo para HTTP 204
 }
 }

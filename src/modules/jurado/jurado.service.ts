@@ -365,7 +365,6 @@ export class JuradoService {
     }));
   }
 
-  // --- MÉTODO REENVIAR INVITACIÓN AÑADIDO AQUÍ ---
   async reenviarInvitacion(id: number) {
     const jurado = await this.prisma.jurado.findUnique({
       where: { id: id, deleted: false },
@@ -426,7 +425,6 @@ export class JuradoService {
   async asignarVideojuego(asignarDto: AsignarVideojuegoDto): Promise<any> {
     const { juradoId, videojuegoId } = asignarDto;
 
-    // 1. Verificar si el jurado existe y no está eliminado
     const jurado = await this.prisma.jurado.findUnique({
       where: { 
         id: juradoId,
@@ -437,7 +435,6 @@ export class JuradoService {
       throw new NotFoundException(`Jurado con ID "${juradoId}" no encontrado o está eliminado.`);
     }
 
-    // 2. Verificar si el videojuego existe y no está eliminado
     const videojuego = await this.prisma.videojuego.findUnique({
       where: { 
         id: videojuegoId,
@@ -448,7 +445,6 @@ export class JuradoService {
       throw new NotFoundException(`Videojuego con ID "${videojuegoId}" no encontrado o está eliminado.`);
     }
 
-    // 3. Intentar crear la asignación
     try {
       const nuevaAsignacion = await this.prisma.videojuegoAsignado.create({
         data: {
@@ -457,7 +453,6 @@ export class JuradoService {
           id_videojuego: videojuegoId,
           
         },
-        // Opcional
         include: {
           jurado: { 
             select: { 
@@ -504,9 +499,7 @@ export class JuradoService {
         id_videojuego: videojuegoId,
       },
     },
-  });
-
-  
+  }); 
 
   await this.prisma.videojuegoAsignado.update({
     where: {
