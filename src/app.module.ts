@@ -15,6 +15,7 @@ import { UsersModule } from './users/users.module';
 import { PrismaModule } from './prisma/prisma.module';
 import { MailModule } from './common/mail.module';
 import { AnalyticsModule } from './modules/Admin/analytics/analytics.module';
+import { PanelModule } from './modules/Admin/Panel/panel.module';
 
 @Module({
   imports: [
@@ -36,6 +37,7 @@ import { AnalyticsModule } from './modules/Admin/analytics/analytics.module';
     UsersModule,
     MailModule,
     AnalyticsModule,
+    PanelModule,
   ],
   providers: [], 
 })

@@ -8,12 +8,20 @@ export class PanelService {
 
   // 🖥️ Contar equipos en estado Inscrito_confirmado
   async getCountEquipos() {
-    return await this.prisma.equipo.count({
+    const equiposCompletos = await this.prisma.equipo.count({
+      where: {
+        estado: Estado.Inscripcion_completa,
+        deleted: false,
+      },
+    });
+    const equiposConfirmados = await this.prisma.equipo.count({
       where: {
         estado: Estado.Inscrito_confirmado,
         deleted: false,
       },
     });
+
+    return equiposCompletos + equiposConfirmados;
   }
 
   // 🎮 Contar videojuegos
