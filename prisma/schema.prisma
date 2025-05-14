@@ -9,33 +9,33 @@ datasource db {
 }
 
 model Usuario {
-  id                 Int          @id @default(autoincrement())
-  nombre_completo    String
-  email              String       @unique
-  hash_contrasena    String
-  create_at          DateTime     @default(now())
-  update_at          DateTime     @default(now()) @updatedAt
-  deleted            Boolean      @default(false)
+  id              Int          @id @default(autoincrement())
+  nombre_completo String
+  email           String       @unique
+  hash_contrasena String
+  create_at       DateTime     @default(now())
+  update_at       DateTime     @default(now()) @updatedAt
+  deleted         Boolean      @default(false)
   token_confirmacion String?
-  estudiante         Estudiante?
-  jurado             Jurado?
-  nrcs               NRC[]        @relation("ProfesorNRC")
-  roles              RolUsuario[]
+  estudiante      Estudiante?
+  jurado          Jurado?
+  nrcs            NRC[]        @relation("ProfesorNRC")
+  roles           RolUsuario[]
 }
 
 model Estudiante {
-  id                 Int             @id @default(autoincrement())
-  equipo_id          Int
-  id_user            Int             @unique
-  github             String
-  confirmado         Boolean         @default(false)
-  create_at          DateTime        @default(now())
-  update_at          DateTime        @default(now()) @updatedAt
-  deleted            Boolean         @default(false)
+  id                Int             @id @default(autoincrement())
+  equipo_id         Int
+  id_user           Int             @unique
+  github            String
+  confirmado        Boolean         @default(false)
   token_confirmacion String?
-  equipo             Equipo          @relation(fields: [equipo_id], references: [id])
-  usuario            Usuario         @relation(fields: [id_user], references: [id])
-  estudianteNrcs     EstudianteNRC[]
+  create_at         DateTime        @default(now())
+  update_at         DateTime        @default(now()) @updatedAt
+  deleted           Boolean         @default(false)
+  equipo            Equipo          @relation(fields: [equipo_id], references: [id])
+  usuario           Usuario         @relation(fields: [id_user], references: [id])
+  estudianteNrcs    EstudianteNRC[]
 }
 
 model EstudianteNRC {
@@ -110,7 +110,7 @@ model Materia {
 }
 
 model NRC {
-  codigo_nrc     Int             @id
+  codigo_nrc     Int             @id 
   materia_id     Int
   profesor_id    Int?
   create_at      DateTime        @default(now())
@@ -118,7 +118,7 @@ model NRC {
   deleted        Boolean         @default(false)
   estudianteNrcs EstudianteNRC[]
   materia        Materia         @relation(fields: [materia_id], references: [id])
-  profesor       Usuario?        @relation("ProfesorNRC", fields: [profesor_id], references: [id])
+  profesor       Usuario?         @relation("ProfesorNRC", fields: [profesor_id], references: [id])
 }
 
 model Evaluacion {
