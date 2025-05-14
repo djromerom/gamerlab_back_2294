@@ -4,6 +4,7 @@ import { VideojuegoModule } from './modules/videojuego/videojuego.module';
 import { ConfigModule } from '@nestjs/config';
 import { StorageModule } from './modules/storage/storage.module'
 import { JuradoModule } from './modules/jurado/jurado.module';
+
 import { EvaluacionModule } from './modules/evaluacion/evaluacion.module'
 import { ReportsModule } from './modules/reports/reports.module';
 import { CriterioModule } from './modules/Admin/criterio/criterio.module';

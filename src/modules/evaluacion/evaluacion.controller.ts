@@ -7,58 +7,68 @@ import {
   Req,
   UseGuards,
 } from '@nestjs/common';
+
 import { EvaluacionService } from './evaluacion.service';
 import { CreateEvaluacionDto } from './dto/create-evaluacion.dto';
 import { EvaluacionEntity } from './entities/evaluacion.entity';
 import { ApiTags, ApiResponse } from '@nestjs/swagger';
-// import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
-// import { AuthenticatedRequest } from 'src/auth/types';
 
 @ApiTags('Evaluaciones')
 @Controller('evaluaciones')
-// @UseGuards(JwtAuthGuard, RolesGuard))
-// @Roles('jurado')
 export class EvaluacionController {
   constructor(private readonly evaluacionService: EvaluacionService) {}
 
-  @Get('asignadas')
-  @ApiResponse({ status: 200, description: 'Videojuegos asignados' })
-  async getVideojuegosAsignados(@Req() req /*: AuthenticatedRequest */) {
-    const juradoId = req.user?.id || 1;
-    return this.evaluacionService.getVideojuegosAsignados(juradoId);
-  }
-
-  @Get('realizadas')
+  @Get('asignadas/:juradoId')
   @ApiResponse({
     status: 200,
-    description: 'Evaluaciones realizadas',
+    description:
+      'Videojuegos asignados aun jurado (por calificar y calificados)',
+  })
+  async getVideojuegosAsignados(@Param('juradoId') juradoId: string) {
+    return this.evaluacionService.getVideojuegosAsignados(Number(juradoId));
+  }
+
+  @Get('realizadas/:juradoId')
+  @ApiResponse({
+    status: 200,
+    description: 'Evaluaciones realizadas por un jurado',
     type: [EvaluacionEntity],
   })
-  async getEvaluacionesHechas(@Req() req /*: AuthenticatedRequest */) {
-    const juradoId = req.user?.id || 1;
-    return this.evaluacionService.getEvaluacionesHechas(juradoId);
+  async getEvaluacionesHechas(@Param('juradoId') juradoId: string) {
+    return this.evaluacionService.getEvaluacionesHechas(Number(juradoId));
   }
 
   @Get(':id')
   @ApiResponse({
     status: 200,
-    description: 'Detalle de evaluación',
+    description: 'Detalle de evaluación de un videojuego',
     type: EvaluacionEntity,
   })
   async getEvaluacionPorId(@Param('id') id: string) {
     return this.evaluacionService.getEvaluacionPorId(Number(id));
   }
 
-  @Get('videojuego/:id')
-  @ApiResponse({
-    status: 200,
-    description: 'Evaluaciones de un videojuego',
-  })
-  async getEvaluacionesPorVideojuego(@Param('id') id: string) {
-    return this.evaluacionService.getEvaluacionesPorVideojuego(Number(id));
+  @Get('notaVideojuego/:videojuegoId/:juradoId')
+  async getEvaluacionesPorVideojuego(
+    @Param('videojuegoId') id: string,
+    @Param('juradoId') juradoId: string,
+  ) {
+    return this.evaluacionService.getEvaluacionesPorVideojuego(
+      Number(id),
+      Number(juradoId),
+    );
   }
 
-  @Post(':videojuegoId')
+  @Get('infoVideojuego/:videojuegoId')
+  @ApiResponse({
+    status: 200,
+    description: 'Obtener toda la info de un videojuego por ID',
+  })
+  async getVideojuegoPorId(@Param('videojuegoId') id: string) {
+    return this.evaluacionService.getVideojuegoPorId(Number(id));
+  }
+
+  @Post('evaluar/:videojuegoId/:juradoId')
   @ApiResponse({
     status: 201,
     description: 'Evaluación creada',
@@ -66,12 +76,11 @@ export class EvaluacionController {
   })
   async crearEvaluacion(
     @Param('videojuegoId') videojuegoId: string,
-    @Req() req /*: AuthenticatedRequest */,
+    @Param('juradoId') juradoId: string,
     @Body() dto: CreateEvaluacionDto,
   ) {
-    const juradoId = req.user?.id || 1;
     return this.evaluacionService.crearEvaluacion(
-      juradoId,
+      Number(juradoId),
       Number(videojuegoId),
       dto,
     );
