@@ -1,25 +1,20 @@
-import { ApiProperty } from "@nestjs/swagger";
-import { IsEnum, IsInt, IsNotEmpty, IsOptional, IsString } from "class-validator";
-import { EstadoJurado } from "@prisma/client";
+import { ApiProperty } from '@nestjs/swagger';
+import { IsEmail, IsNotEmpty, IsString } from 'class-validator';
 
 export class CreateJuradoDto {
-  @IsInt()
-  @IsNotEmpty()
-  @ApiProperty({ required: true, description: 'ID del usuario asociado al jurado' })
-  id_user: number;
-
-  @IsString()
-  @IsNotEmpty()
-  @ApiProperty({ required: true, description: 'Token único para confirmación por correo' })
-  token_confirmacion: string;
-
-  @IsEnum(EstadoJurado)
-  @IsOptional()
-  @ApiProperty({ 
-    required: false, 
-    enum: EstadoJurado, 
-    default: EstadoJurado.no_confirmado,
-    description: 'Estado del jurado (confirmado o no confirmado)' 
+  @ApiProperty({
+    description: 'Nombre completo del jurado',
+    example: '',
   })
-  estado?: EstadoJurado;
+  @IsString({ message: 'El nombre completo debe ser una cadena de texto' })
+  @IsNotEmpty({ message: 'El nombre completo no puede estar vacío' })
+  nombre_completo: string;
+
+  @ApiProperty({
+    description: 'Correo electrónico institucional del jurado',
+    example: '',
+  })
+  @IsEmail({}, { message: 'El correo electrónico debe tener un formato válido' })
+  @IsNotEmpty({ message: 'El correo electrónico no puede estar vacío' })
+  email: string;
 }

@@ -11,6 +11,8 @@ import { AdminNrcModule } from './modules/Admin/nrc/adminNrc.module';
 import { MateriaModule } from './modules/Admin/materia/materia.module';
 import { AuthModule } from './auth/auth.module';
 import { UsersModule } from './users/users.module';
+import { PrismaModule } from './prisma/prisma.module';
+import { MailModule } from './common/mail.module';
 import { AnalyticsModule } from './modules/Admin/analytics/analytics.module';
 
 @Module({
@@ -19,10 +21,11 @@ import { AnalyticsModule } from './modules/Admin/analytics/analytics.module';
       isGlobal: true,
       envFilePath: '.env',
     }),
+    PrismaModule,
     EvaluacionModule,
     EquipoModule, 
     VideojuegoModule, 
-    StorageModule, // Keep this commented if you're having issues with Supabase
+    StorageModule,
     JuradoModule,
     ReportsModule,
     CriterioModule,
@@ -30,6 +33,7 @@ import { AnalyticsModule } from './modules/Admin/analytics/analytics.module';
     MateriaModule,
     AuthModule,
     UsersModule,
+    MailModule,
     AnalyticsModule,
   ],
   providers: [], 
