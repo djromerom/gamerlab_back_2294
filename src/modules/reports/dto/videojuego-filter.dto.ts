@@ -1,6 +1,6 @@
 import { ApiPropertyOptional } from '@nestjs/swagger';
 import { Transform } from 'class-transformer';
-import { IsOptional, IsInt, IsArray } from 'class-validator';
+import { IsOptional, IsInt, IsArray, IsString } from 'class-validator';
 
 export class VideojuegoFilter {
   @IsOptional()
@@ -12,4 +12,11 @@ export class VideojuegoFilter {
     description: 'IDs of the videogames to fetch.',
   })
   videojuegos?: number[];
+
+  @IsOptional()
+  @IsString()
+  @ApiPropertyOptional({
+    description: 'Search query.',
+  })
+  search?: string;
 }
