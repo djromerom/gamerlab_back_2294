@@ -105,7 +105,7 @@ export class JuradoController {
     return this.juradoService.remove(id);
   }
 
-  @Patch('confirmar-invitacion')
+  @Post('confirmar-invitacion')
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Confirmar invitación de jurado y establecer contraseña inicial' })
   @ApiBody({ type: ConfirmarJuradoDto })
