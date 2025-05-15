@@ -108,8 +108,8 @@ export class JuradoController {
     return this.juradoService.remove(id);
   }
 
-  @Post('confirmar-invitacion') // O la ruta que elijas
-  @HttpCode(HttpStatus.OK) // O CREATED si tiene más sentido para ti
+  @Patch('confirmar-invitacion')
+  @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Confirmar invitación de jurado y establecer contraseña inicial' })
   @ApiBody({ type: ConfirmarJuradoDto })
   @ApiResponse({ status: 200, description: 'Cuenta de jurado confirmada y contraseña establecida.'})
