@@ -14,11 +14,11 @@ async function bootstrap() {
     forbidNonWhitelisted: true,
   }));
 
-  app.enableCors({
-    origin: 'http://localhost:3001',
-    methods: ['GET', 'POST', 'PATCH', 'DELETE', 'OPTIONS', 'PUT'],
-    credentials: true,
-  });
+app.enableCors({
+  origin: '*',
+  methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
+  credentials: true,
+});
 
   const config = new DocumentBuilder()
     .setTitle('Feria Gamer API')
