@@ -44,8 +44,14 @@ FROM
 		ON ev.jurado_id = ju.id
 	JOIN "Usuario" us
 		ON ju.id_user = us.id
+  JOIN "Equipo" eq
+		ON vg.equipo_id = eq.id
+	JOIN "Estudiante" es
+		ON eq.id = es.equipo_id
+	JOIN "EstudianteNRC" esnrc
+		ON es.id = esnrc.id_estudiante
 	JOIN "NRC" nrc
-		ON us.id = nrc.profesor_id
+		ON esnrc.id_nrc = nrc.codigo_nrc
 	JOIN "Materia" mat
 		ON nrc.materia_id = mat.id
 WHERE
