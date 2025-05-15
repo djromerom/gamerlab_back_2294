@@ -10,9 +10,6 @@ import {
   Delete,
   ParseIntPipe,
   NotFoundException,
-  UseInterceptors,
-  ClassSerializerInterceptor,
-  SerializeOptions,
 } from '@nestjs/common';
 import { JuradoService } from './jurado.service';
 import { CreateJuradoDto } from './dto/create-jurado.dto';
@@ -112,10 +109,10 @@ export class JuradoController {
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Confirmar invitación de jurado y establecer contraseña inicial' })
   @ApiBody({ type: ConfirmarJuradoDto })
-  @ApiOkResponse({ description: 'Cuenta de jurado confirmada y contraseña establecida.'})
-  @ApiResponse({ status: HttpStatus.BAD_REQUEST, description: 'Datos de entrada inválidos (ej. token o contraseña).' })
-  @ApiNotFoundResponse({ description: 'Token inválido o jurado no encontrado.' })
-  @ApiResponse({ status: HttpStatus.INTERNAL_SERVER_ERROR, description: 'Error interno del servidor.' })
+  @ApiResponse({ status: 200, description: 'Cuenta de jurado confirmada y contraseña establecida.'})
+  @ApiResponse({ status: 400, description: 'Datos de entrada inválidos (ej. token o contraseña).' })
+  @ApiResponse({ status: 404, description: 'Token inválido o jurado no encontrado.' })
+  @ApiResponse({ status: 500, description: 'Error interno del servidor.' })
   async confirmarYEstablecerContrasena(@Body() confirmarJuradoDto: ConfirmarJuradoDto) {
     return this.juradoService.confirmarInvitacionYEstablecerContrasena(
       confirmarJuradoDto,
