@@ -3,16 +3,35 @@ import { Prisma } from '@prisma/client';
 import { PrismaService } from 'src/prisma/prisma.service';
 import * as excel from 'excel4node';
 import { Decimal } from '@prisma/client/runtime/library';
+import { VideojuegoFilter } from './dto/videojuego-filter.dto';
+import { WorksheetFilter, WorksheetViewType } from './dto/workbook-filter.dto';
 
-function getRatingsQuery(videojuegos?: number[]) {
-  const idCheck = videojuegos
-    ? Prisma.sql`AND vg.id IN (${Prisma.join(videojuegos)})`
+function makeSearchFilter(search: string) {
+  return Prisma.sql`AND (
+	POSITION(LOWER(${search}) in LOWER(mat.nombre)) > 0
+	OR POSITION(LOWER(${search}) in LOWER(nrc.codigo_nrc::text)) > 0
+	OR POSITION(LOWER(${search}) in LOWER(vg.nombre_videojuego)) > 0
+	OR POSITION(LOWER(${search}) in LOWER(us.nombre_completo)) > 0
+)`;
+}
+
+function getRatingsQuery(filter: VideojuegoFilter) {
+  const idCheck = filter.videojuegos
+    ? Prisma.sql`AND vg.id IN (${Prisma.join(filter.videojuegos)})`
+    : Prisma.empty;
+
+  const searchFilter = filter.search
+    ? makeSearchFilter(filter.search)
     : Prisma.empty;
 
   return Prisma.sql`SELECT
-	vg.id id,
-	cr.nombre criterio,
-	AVG(rb.valoracion) average
+	vg.id id
+	,cr.nombre criterio
+	,vg.nombre_videojuego name
+	,us.nombre_completo jurado
+	,mat.nombre materia
+	,nrc.codigo_nrc nrc
+	,AVG(rb.valoracion) average
 FROM
 	"Rubrica" rb
 	JOIN "Criterio" cr
@@ -21,24 +40,41 @@ FROM
 		ON rb.id_evaluacion = ev.id
 	JOIN "Videojuego" vg
 		ON ev.videojuego_id = vg.id
+	JOIN "Jurado" ju
+		ON ev.jurado_id = ju.id
+	JOIN "Usuario" us
+		ON ju.id_user = us.id
+  JOIN "Equipo" eq
+		ON vg.equipo_id = eq.id
+	JOIN "Estudiante" es
+		ON eq.id = es.equipo_id
+	JOIN "EstudianteNRC" esnrc
+		ON es.id = esnrc.id_estudiante
+	JOIN "NRC" nrc
+		ON esnrc.id_nrc = nrc.codigo_nrc
+	JOIN "Materia" mat
+		ON nrc.materia_id = mat.id
 WHERE
 	rb.deleted = false
 	AND cr.deleted = false
 	AND ev.deleted = false
 	AND vg.deleted = false
-  ${idCheck}
+	AND us.deleted = false ${searchFilter} ${idCheck}
 GROUP BY
-	vg.id,
-	cr.nombre`;
+	vg.id
+	,cr.nombre
+	,vg.nombre_videojuego
+	,us.nombre_completo
+	,mat.nombre
+	,nrc.codigo_nrc`;
 }
-
-type GameName = {
-  id: number;
-  nombre_videojuego: string;
-};
 
 export interface RatingRow {
   id: number;
+  name: string;
+  jurado: string;
+  materia: string;
+  nrc: number;
   criterio: string;
   average: Decimal;
 }
@@ -47,33 +83,13 @@ export interface RatingRow {
 export class ReportsService {
   constructor(private readonly prismaService: PrismaService) {}
 
-  private getAverageRatingsByIds(videojuegos?: number[]) {
+  getAverageRatings(filter: VideojuegoFilter): Promise<RatingRow[]> {
     return this.prismaService.$queryRaw<RatingRow[]>(
-      getRatingsQuery(videojuegos),
+      getRatingsQuery(filter),
     );
   }
 
-  private getGameNames(videojuegos?: number[]) {
-    return this.prismaService.videojuego.findMany({
-      where: {
-        id: {
-          in: videojuegos,
-        },
-      },
-      select: {
-        id: true,
-        nombre_videojuego: true,
-      },
-    });
-  }
-
-  getAverageRatings(videojuegos?: number[]): Promise<RatingRow[]> {
-    return this.getAverageRatingsByIds(videojuegos);
-  }
-
-  private asWorkbook(names: GameName[], ratings: RatingRow[]) {
-    const idMap = new Map(names.map((g) => [g.id, g.nombre_videojuego]));
-
+  private asWorkbook(view: WorksheetViewType, ratings: RatingRow[]) {
     // Each row has a videogame, columns have criteria
     const rowMap = new Map<number, number>();
     const columnMap = new Map<string, number>();
@@ -82,8 +98,9 @@ export class ReportsService {
     const worksheet = workbook.addWorksheet('Promedios');
 
     // Initialize ID & name columns
-    worksheet.cell(1, 1).string('#');
-    worksheet.cell(1, 2).string('Nombre');
+    const isByName = view === WorksheetViewType.ByName;
+    worksheet.cell(1, 1).string(isByName ? '#' : 'Juego');
+    worksheet.cell(1, 2).string(isByName ? 'Nombre' : 'Jurado');
 
     let currentRow = 1;
     let currentColumn = 2;
@@ -94,8 +111,8 @@ export class ReportsService {
         row = ++currentRow;
         rowMap.set(rating.id, row);
 
-        worksheet.cell(row, 1).number(rating.id);
-        worksheet.cell(row, 2).string(idMap.get(rating.id)!);
+        worksheet.cell(row, 1).string(isByName ? rating.id.toString() : rating.name);
+        worksheet.cell(row, 2).string(isByName ? rating.name : rating.jurado);
       }
 
       let column = columnMap.get(rating.criterio);
@@ -112,12 +129,16 @@ export class ReportsService {
     return workbook;
   }
 
-  async getAverageRatingsWorkbook(videojuegos?: number[]) {
-    const [names, ratings] = await this.prismaService.$transaction([
-      this.getGameNames(videojuegos),
-      this.getAverageRatingsByIds(videojuegos),
-    ]);
+  async getAverageRatingsWorkbook(filter: WorksheetFilter) {
+    const vgf = new VideojuegoFilter();
+    if (filter.view === WorksheetViewType.ByJurado) {
+      vgf.videojuegos = filter.videojuegos?.slice(0,1);
+    } else {
+      vgf.videojuegos = filter.videojuegos;
+    }
 
-    return this.asWorkbook(names, ratings);
+    const ratings = await this.getAverageRatings(vgf);
+
+    return this.asWorkbook(filter.view, ratings);
   }
 }
