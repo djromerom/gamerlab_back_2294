@@ -27,14 +27,43 @@ export class EquipoService {
   }
 
   async findAll(
-    limit: number | null = null, 
-    materiaId: number | null = null,
-    codigoNrc: number | null = null,
-  ) {
-    // Si se proporciona un ID de materia, filtrar los equipos por ese ID
+  limit: number | null = null, 
+  materiaId: number | null = null,
+  codigoNrc: number | null = null,
+) {
+  // Configuración inicial
+  let whereCondition: Prisma.EquipoWhereInput = { deleted: false };
+  
+  // Si ambos filtros están presentes, usar AND entre ellos
+  if (materiaId !== null && codigoNrc !== null) {
+    whereCondition = {
+      AND: [
+        { deleted: false },
+        {
+          estudiantes: {
+            some: {
+              deleted: false,
+              estudianteNrcs: {
+                some: {
+                  deleted: false,
+                  id_nrc: codigoNrc,
+                  nrc: {
+                    deleted: false,
+                    materia_id: materiaId
+                  }
+                }
+              }
+            }
+          }
+        }
+      ]
+    };
+  } 
+  // Si solo está presente uno, usar el filtro individual
+  else {
     const condiciones: Prisma.EquipoWhereInput[] = [];
-
-    if (materiaId != null) {
+    
+    if (materiaId !== null) {
       condiciones.push({
         estudiantes: {
           some: {
@@ -52,8 +81,8 @@ export class EquipoService {
         },
       });
     }
-
-    if (codigoNrc != null) {
+    
+    if (codigoNrc !== null) {
       condiciones.push({
         estudiantes: {
           some: {
@@ -68,12 +97,21 @@ export class EquipoService {
         },
       });
     }
-
-    const equipos = await this.prisma.equipo.findMany({
-      where: condiciones.length > 0
-        ? { AND: [{ deleted: false }, { OR: condiciones }] }
-        : { deleted: false },   // sin filtros, devuelve todos los equipos no eliminados
-      include: {
+    
+    if (condiciones.length > 0) {
+      whereCondition = { 
+        AND: [
+          { deleted: false }, 
+          { OR: condiciones }
+        ] 
+      };
+    }
+  }
+  
+  // Ejecutar la consulta con la condición construida
+  const equipos = await this.prisma.equipo.findMany({
+    where: whereCondition,
+    include: {
         estudiantes: {
           where: { deleted: false },
           include: {
