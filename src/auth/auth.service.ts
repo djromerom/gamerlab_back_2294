@@ -16,7 +16,7 @@ export class AuthService {
   ) {}
 
   async signUp(createUserDto: CreateUserDto) {
-    const { nombre_completo, email, rol } = createUserDto;
+    const { nombre_completo, email, rol, password } = createUserDto;
   try {
     const userFound = await this.prismaService.usuario.findUnique({
       where: { email, deleted: false },
@@ -32,7 +32,7 @@ export class AuthService {
       data: {
         nombre_completo,
         email,
-        hash_contrasena: hashedPassword,
+        hash_contrasena: await this.passwordService.hashPassword(password),
         // No se usa token_confirmacion
       },
     });
