@@ -3,7 +3,6 @@ import { ApiProperty } from '@nestjs/swagger';
 
 export class ActivateDto {
   @ApiProperty()
-  @IsEmail()
   @IsNotEmpty()
   token: string;
 

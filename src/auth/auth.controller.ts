@@ -18,10 +18,10 @@ export class AuthController {
 
   @HttpCode(HttpStatus.CREATED)
   @Post('sign-up')
-  async signUp(@Body() usuario: CreateUserDto) {
-    const { nombre_completo, email } = usuario;
-    return this.authService.signUp(nombre_completo, email);
-  }
+async signUp(@Body() usuario: CreateUserDto) {
+  return this.authService.signUp(usuario);
+}
+
 
   @HttpCode(HttpStatus.OK)
   @Post('activate')

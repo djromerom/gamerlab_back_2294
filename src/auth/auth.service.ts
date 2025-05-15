@@ -4,6 +4,8 @@ import { JwtService } from '@nestjs/jwt';
 import { PasswordService } from 'src/common/services/password.service';
 import { EmailService } from 'src/modules/email/email.service';
 
+import { CreateUserDto } from './dto/createUser.dto';
+
 @Injectable()
 export class AuthService {
   constructor(
@@ -13,84 +15,82 @@ export class AuthService {
     private emailService: EmailService,
   ) {}
 
-  async signUp(nombre_completo: string, email: string) {
-    try {
-      const userFound = await this.prismaService.usuario.findUnique({
-        where: { email, deleted: false },
-      });
+  async signUp(createUserDto: CreateUserDto) {
+    const { nombre_completo, email, rol } = createUserDto;
+  try {
+    const userFound = await this.prismaService.usuario.findUnique({
+      where: { email, deleted: false },
+    });
 
-      if (userFound) throw new BadRequestException('El usuario ya existe');
+    if (userFound) throw new BadRequestException('El usuario ya existe');
 
-      const hashedPassword = await this.passwordService.hashPassword(await this.passwordService.randomPassword(10));
-      const token = await this.passwordService.hashPassword(email);
+    // Aquí ahora el usuario debe enviar contraseña en el signup o generarla y devolverla
+    const generatedPassword = await this.passwordService.randomPassword(10);
+    const hashedPassword = await this.passwordService.hashPassword(generatedPassword);
 
-      const usuario = await this.prismaService.usuario.create({
-        data: {
-          nombre_completo,
-          email,
-          hash_contrasena: hashedPassword,
-          token_confirmacion: token,
-        },
-      });
-
-
-      const { hash_contrasena, ...userWithoutPassword } = usuario;
-      const payload = { ...userWithoutPassword };
-      const accessToken = await this.jwtService.signAsync({ payload });
-
-      await this.emailService.sendEmailProfesor({
+    const usuario = await this.prismaService.usuario.create({
+      data: {
+        nombre_completo,
         email,
-        token
-      });
+        hash_contrasena: hashedPassword,
+        // No se usa token_confirmacion
+      },
+    });
 
-      return { accessToken };
+   
+    // Generar JWT normalmente
+    const { hash_contrasena, ...userWithoutPassword } = usuario;
+    const payload = { ...userWithoutPassword };
+    const accessToken = await this.jwtService.signAsync({ payload });
 
-    } catch (error) {
-      if (error instanceof BadRequestException) {
-        throw error;
-      }
-      throw new Error(error);
+    return { accessToken, password: generatedPassword }; // opcional devolver password si la creas aquí
+  } catch (error) {
+    if (error instanceof BadRequestException) {
+      throw error;
     }
+    throw new Error(error);
   }
+}
+
 
   async signIn(email: string, password: string) {
-    try {
-      const user = await this.prismaService.usuario.findUnique({
-        where: { email },
-        include: {
-          roles: {
-            include: {
-              rol: {
-                select: {
-                  nombre: true,
-                }
-              }
-            },
-          }
-        }
-      });
-  
-      if (!user) {
-        throw new UnauthorizedException('Credenciales incorrectas');
-      }
-  
-      const isMatch = await this.passwordService.comparePassword(password, user.hash_contrasena);
-      if (!isMatch) {
-        throw new UnauthorizedException('Credenciales incorrectas');
-      }
-      const { hash_contrasena, ...userWithoutPassword } = user;
-      const payload = { ...userWithoutPassword };
-      const accessToken = await this.jwtService.signAsync({ payload });
+  const usuario = await this.prismaService.usuario.findFirst({
+  where: { email, deleted: false },
+  include: {
+    roles: {
+      include: {
+        rol: true, // 👈 esto permite acceder a `r.rol.nombre`
+      },
+    },
+  },
+});
 
-      return { accessToken, user: userWithoutPassword };
 
-    } catch (error) {
-      if (error instanceof UnauthorizedException) {
-        throw error;
-      }
-      throw new InternalServerErrorException("Error en signIn");
-    }
+  if (!usuario) throw new UnauthorizedException('Credenciales inválidas');
+
+  // 🚫 Si aún no ha activado la cuenta (aún tiene token)
+  if (usuario.token_confirmacion) {
+    throw new UnauthorizedException('Debe activar su cuenta primero');
   }
+
+  const passwordValid = await this.passwordService.comparePassword(
+    password,
+    usuario.hash_contrasena,
+  );
+
+  if (!passwordValid) throw new UnauthorizedException('Credenciales inválidas');
+
+  const roles = usuario.roles.map(r => r.rol.nombre); // asumiendo que la relación incluye campo `nombre`
+  const payload = {
+    sub: usuario.id,
+    email: usuario.email,
+    roles,
+  };
+
+  const token = await this.jwtService.signAsync(payload);
+  return { access_token: token };
+}
+
 
   async validateUser(token: string) {
     return this.prismaService.usuario.findFirst({
