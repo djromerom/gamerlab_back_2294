@@ -25,20 +25,28 @@ export class JuradoService {
 
   async create(createJuradoDto: CreateJuradoDto) {
     const { email, nombre_completo } = createJuradoDto;
+
     const existingUser = await this.prisma.usuario.findUnique({
       where: { email },
     });
+
     if (existingUser) {
       throw new ConflictException(
         `El correo electrónico "${email}" ya está registrado.`,
       );
     }
+
+    // Solución Error 1: Inicializar como string vacío
     let confirmationToken: string = '';
+
     try {
       const tempPassword = email + crypto.randomBytes(4).toString('hex');
       const saltRounds = 10;
       const hashedPassword = await bcrypt.hash(tempPassword, saltRounds);
+      // Asignar el valor (sin const)
       confirmationToken = crypto.randomBytes(32).toString('hex');
+
+      // Solución Error 2: Devolver explícitamente usuario y jurado
       const { usuario, jurado } = await this.prisma.$transaction(async (tx) => {
         const createdUsuario = await tx.usuario.create({
           data: {
@@ -47,16 +55,21 @@ export class JuradoService {
             hash_contrasena: hashedPassword,
           },
         });
+
+        // Quitar el 'include' aquí, lo manejaremos después
         const createdJurado = await tx.jurado.create({
           data: {
             id_user: createdUsuario.id,
-            estado: EstadoJurado.no_confirmado,
+            estado: EstadoJurado.no_confirmado, // Usar el ENUM importado si es necesario
             token_confirmacion: confirmationToken,
             ultima_conexion: new Date(),
           },
         });
+        // Devolver ambos objetos creados
         return { usuario: createdUsuario, jurado: createdJurado };
       });
+
+      // Usar directamente el objeto 'usuario' devuelto por la transacción
       if (confirmationToken && usuario) {
         await this.mailService.sendJuradoInvitation(
           usuario.email,
@@ -64,9 +77,12 @@ export class JuradoService {
           confirmationToken,
         );
       }
+
+      // Construir manualmente el objeto de respuesta deseado
+      // para devolver el Jurado con su Usuario asociado (datos seleccionados)
       const responseJurado = {
-          ...jurado,
-          usuario: {
+          ...jurado, // Campos del jurado creado
+          usuario: { // Añadir objeto usuario anidado
               id: usuario.id,
               nombre_completo: usuario.nombre_completo,
               email: usuario.email,
@@ -74,7 +90,9 @@ export class JuradoService {
               update_at: usuario.update_at
           }
       };
+
       return responseJurado;
+
     } catch (error) {
       if (error instanceof ConflictException) {
         throw error;
@@ -125,6 +143,7 @@ export class JuradoService {
           },
         },
       });
+
       if (!jurado) {
         throw new NotFoundException(`Jurado con ID "${id}" no encontrado o eliminado.`);
       }
@@ -142,13 +161,16 @@ export class JuradoService {
 
   async update(id: number, updateJuradoDto: UpdateJuradoDto) {
     const { nombre_completo, email } = updateJuradoDto;
+
     const juradoActual = await this.prisma.jurado.findUnique({
        where: { id: id, deleted: false },
        include: { usuario: true }
     });
+
     if (!juradoActual) {
        throw new NotFoundException(`Jurado con ID "${id}" no encontrado o eliminado.`);
     }
+
     if (email && email !== juradoActual.usuario.email) {
        const existingUserWithEmail = await this.prisma.usuario.findUnique({
           where: { email },
@@ -157,6 +179,7 @@ export class JuradoService {
           throw new ConflictException(`El correo electrónico "${email}" ya está registrado por otro usuario.`);
        }
     }
+
     try {
        const juradoActualizado = await this.prisma.$transaction(async (tx) => {
           if (nombre_completo || email) {
@@ -169,6 +192,7 @@ export class JuradoService {
                 },
              });
           }
+
           return await tx.jurado.findUniqueOrThrow({
              where: { id: id },
              include: {
@@ -184,7 +208,9 @@ export class JuradoService {
              },
           });
        });
+
        return juradoActualizado;
+
     } catch (error) {
        if (error instanceof ConflictException || error instanceof NotFoundException) {
           throw error;
@@ -201,9 +227,11 @@ export class JuradoService {
        where: { id: id, deleted: false },
        include: { usuario: true }
     });
+
     if (!juradoActual) {
-       throw new NotFoundException(`Jurado con ID "${id}" no encontrado o eliminado.`);
+       throw new NotFoundException(`Jurado con ID "${id}" no encontrado o ya eliminado.`);
     }
+
     try {
       await this.prisma.$transaction(async (tx) => {
         await tx.jurado.update({
@@ -216,6 +244,7 @@ export class JuradoService {
         });
       });
       return;
+
     } catch (error) {
       if (error instanceof NotFoundException) {
          throw error;
@@ -229,22 +258,30 @@ export class JuradoService {
 
   async confirmarInvitacionYEstablecerContrasena(confirmarJuradoDto: ConfirmarJuradoDto) {
     const { token, nueva_contrasena } = confirmarJuradoDto;
-    const jurado = await this.prisma.jurado.findFirst({
+  
+    // 1. Buscar al jurado por el token de confirmación
+    const jurado = await this.prisma.jurado.findFirst({ // Usar findFirst para poder incluir usuario después si es necesario
       where: {
         token_confirmacion: token,
-        estado: EstadoJurado.no_confirmado,
+        estado: EstadoJurado.no_confirmado, // Solo procesar si no ha sido confirmado antes
         deleted: false,
       },
     });
+  
     if (!jurado) {
       throw new NotFoundException(
         'Token inválido, expirado o el jurado ya ha sido confirmado.',
       );
     }
-    const saltRounds = 10;
+  
+    // 2. Hashear la nueva contraseña
+    const saltRounds = 10; // El mismo que usaste al crear la contraseña temporal
     const hashedNuevaContrasena = await bcrypt.hash(nueva_contrasena, saltRounds);
+  
     try {
+      // 3. Actualizar el usuario y el jurado en una transacción
       const usuarioActualizado = await this.prisma.$transaction(async (tx) => {
+        // Actualizar la contraseña en la tabla Usuario
         const updatedUser = await tx.usuario.update({
           where: { id: jurado.id_user },
           data: {
@@ -252,20 +289,25 @@ export class JuradoService {
             update_at: new Date(),
           },
         });
+  
+        // Actualizar el estado del jurado y limpiar el token
         await tx.jurado.update({
           where: { id: jurado.id },
           data: {
             estado: EstadoJurado.confirmado,
-            ultima_conexion: new Date(),
+            ultima_conexion: new Date(), // Actualizar última conexión o momento de confirmación
             update_at: new Date(),
-            token_confirmacion: token,
           },
         });
-        return updatedUser;
+        return updatedUser; // Devolver el usuario actualizado
       });
+  
+      // Podrías devolver un mensaje de éxito o el usuario/jurado actualizado sin la contraseña.
       return {
         message: 'Cuenta de jurado confirmada y contraseña establecida exitosamente.',
+        // email: usuarioActualizado.email // Si quieres devolver algún dato
       };
+  
     } catch (error) {
       console.error('Error al confirmar jurado y establecer contraseña:', error);
       throw new InternalServerErrorException(
