@@ -20,7 +20,7 @@ export class MailService {
 
   async sendJuradoInvitation(userEmail: string, userName: string, token: string) {
     const frontendUrl = this.configService.get<string>('FRONTEND_URL', 'http://localhost:5173/confirm');
-    const confirmationUrl = `${frontendUrl}/confirmar-jurado?token=${token}`;
+    const confirmationUrl = `${frontendUrl}/evaluator/confirm?token=${token}`;
 
     const moradoColor = '#6b45bc';
     const azulColor = '#4285f4';
