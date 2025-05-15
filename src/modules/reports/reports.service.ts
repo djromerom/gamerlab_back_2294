@@ -26,11 +26,11 @@ function getRatingsQuery(filter: VideojuegoFilter) {
 
   return Prisma.sql`SELECT
 	vg.id id
+	,cr.nombre criterio
 	,vg.nombre_videojuego name
 	,us.nombre_completo jurado
 	,mat.nombre materia
-	,nrc.comdigo_nrc nrc
-	,cr.nombre criterio
+	,nrc.codigo_nrc nrc
 	,AVG(rb.valoracion) average
 FROM
 	"Rubrica" rb
@@ -57,8 +57,10 @@ WHERE
 GROUP BY
 	vg.id
 	,cr.nombre
-	,vg.nombre_videojuego name
-	,us.nombre_completo`;
+	,vg.nombre_videojuego
+	,us.nombre_completo
+	,mat.nombre
+	,nrc.codigo_nrc`;
 }
 
 export interface RatingRow {
