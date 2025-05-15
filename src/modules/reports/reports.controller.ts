@@ -1,6 +1,7 @@
 import { Controller, Get, Query, StreamableFile } from '@nestjs/common';
 import { ReportsService } from './reports.service';
 import { VideojuegoFilter } from './dto/videojuego-filter.dto';
+import { WorksheetFilter } from './dto/workbook-filter.dto';
 
 @Controller('reports')
 export class ReportsController {
@@ -8,9 +9,7 @@ export class ReportsController {
 
   @Get('ratings')
   async getAverageRatings(@Query() filter: VideojuegoFilter) {
-    const result = await this.reportsService.getAverageRatings(
-      filter.videojuegos,
-    );
+    const result = await this.reportsService.getAverageRatings(filter);
 
     return result.map((v) => {
       return { ...v, average: v.average.toNumber() };
@@ -18,10 +17,8 @@ export class ReportsController {
   }
 
   @Get('ratings/export/worksheet')
-  async exportRatingsWorksheet(@Query() filter: VideojuegoFilter) {
-    const wb = await this.reportsService.getAverageRatingsWorkbook(
-      filter.videojuegos,
-    );
+  async exportRatingsWorksheet(@Query() filter: WorksheetFilter) {
+    const wb = await this.reportsService.getAverageRatingsWorkbook(filter);
 
     return new StreamableFile(await wb.writeToBuffer(), {
       type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
