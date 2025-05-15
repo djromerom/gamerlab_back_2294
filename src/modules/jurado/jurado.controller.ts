@@ -10,9 +10,6 @@ import {
   Delete,
   ParseIntPipe,
   NotFoundException,
-  UseInterceptors,
-  ClassSerializerInterceptor,
-  SerializeOptions,
 } from '@nestjs/common';
 import { JuradoService } from './jurado.service';
 import { CreateJuradoDto } from './dto/create-jurado.dto';

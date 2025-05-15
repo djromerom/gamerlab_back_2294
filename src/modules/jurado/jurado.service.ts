@@ -36,17 +36,14 @@ export class JuradoService {
       );
     }
 
-    // Solución Error 1: Inicializar como string vacío
     let confirmationToken: string = '';
 
     try {
       const tempPassword = email + crypto.randomBytes(4).toString('hex');
       const saltRounds = 10;
       const hashedPassword = await bcrypt.hash(tempPassword, saltRounds);
-      // Asignar el valor (sin const)
       confirmationToken = crypto.randomBytes(32).toString('hex');
 
-      // Solución Error 2: Devolver explícitamente usuario y jurado
       const { usuario, jurado } = await this.prisma.$transaction(async (tx) => {
         const createdUsuario = await tx.usuario.create({
           data: {
@@ -56,20 +53,17 @@ export class JuradoService {
           },
         });
 
-        // Quitar el 'include' aquí, lo manejaremos después
         const createdJurado = await tx.jurado.create({
           data: {
             id_user: createdUsuario.id,
-            estado: EstadoJurado.no_confirmado, // Usar el ENUM importado si es necesario
+            estado: EstadoJurado.no_confirmado,
             token_confirmacion: confirmationToken,
             ultima_conexion: new Date(),
           },
         });
-        // Devolver ambos objetos creados
         return { usuario: createdUsuario, jurado: createdJurado };
       });
 
-      // Usar directamente el objeto 'usuario' devuelto por la transacción
       if (confirmationToken && usuario) {
         await this.mailService.sendJuradoInvitation(
           usuario.email,
@@ -78,11 +72,9 @@ export class JuradoService {
         );
       }
 
-      // Construir manualmente el objeto de respuesta deseado
-      // para devolver el Jurado con su Usuario asociado (datos seleccionados)
       const responseJurado = {
-          ...jurado, // Campos del jurado creado
-          usuario: { // Añadir objeto usuario anidado
+          ...jurado, 
+          usuario: { 
               id: usuario.id,
               nombre_completo: usuario.nombre_completo,
               email: usuario.email,
@@ -259,11 +251,10 @@ export class JuradoService {
   async confirmarInvitacionYEstablecerContrasena(confirmarJuradoDto: ConfirmarJuradoDto) {
     const { token, nueva_contrasena } = confirmarJuradoDto;
   
-    // 1. Buscar al jurado por el token de confirmación
-    const jurado = await this.prisma.jurado.findFirst({ // Usar findFirst para poder incluir usuario después si es necesario
+    const jurado = await this.prisma.jurado.findFirst({ 
       where: {
         token_confirmacion: token,
-        estado: EstadoJurado.no_confirmado, // Solo procesar si no ha sido confirmado antes
+        estado: EstadoJurado.no_confirmado,
         deleted: false,
       },
     });
@@ -274,14 +265,11 @@ export class JuradoService {
       );
     }
   
-    // 2. Hashear la nueva contraseña
-    const saltRounds = 10; // El mismo que usaste al crear la contraseña temporal
+    const saltRounds = 10;
     const hashedNuevaContrasena = await bcrypt.hash(nueva_contrasena, saltRounds);
   
     try {
-      // 3. Actualizar el usuario y el jurado en una transacción
       const usuarioActualizado = await this.prisma.$transaction(async (tx) => {
-        // Actualizar la contraseña en la tabla Usuario
         const updatedUser = await tx.usuario.update({
           where: { id: jurado.id_user },
           data: {
@@ -290,22 +278,19 @@ export class JuradoService {
           },
         });
   
-        // Actualizar el estado del jurado y limpiar el token
         await tx.jurado.update({
           where: { id: jurado.id },
           data: {
             estado: EstadoJurado.confirmado,
-            ultima_conexion: new Date(), // Actualizar última conexión o momento de confirmación
+            ultima_conexion: new Date(),
             update_at: new Date(),
           },
         });
-        return updatedUser; // Devolver el usuario actualizado
+        return updatedUser; 
       });
   
-      // Podrías devolver un mensaje de éxito o el usuario/jurado actualizado sin la contraseña.
       return {
         message: 'Cuenta de jurado confirmada y contraseña establecida exitosamente.',
-        // email: usuarioActualizado.email // Si quieres devolver algún dato
       };
   
     } catch (error) {
@@ -510,7 +495,6 @@ export class JuradoService {
           }
         }
       });
-      
       
       return { 
         message: 'Videojuego asignado al jurado exitosamente.', 
